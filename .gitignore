@@ -1,0 +1,8 @@
+# Local output. Skills write fetches here. Shareable generated files go in .tmp/generated/.
+.tmp/
+
+# Repositories cloned from GitHub.
+repos/
+
+# Local secrets. Copy .env.example to .env.
+.env
