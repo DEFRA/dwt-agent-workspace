@@ -711,3 +711,25 @@ Lewis Magri, 2026-11-26 14:31 UTC
 The reply for a request to edit a generated Cursor or Claude rule or skill is no longer all capital letters. The first sentence stays in capital letters. The sentences after it are normal sentences.
 
 Covers: `.rulesync/rules/rulesync.md`, `.rulesync/skills/rulesync/SKILL.md`.
+
+## 83. Workspace rules do not apply under repos/
+
+Lewis Magri, 2026-11-26 15:02 UTC
+
+Always-on workspace rules apply to `dwt-agent-workspace`. They do not apply to a directory under `repos/`. Work in `repos/<name>` follows that repository. A command for that repository still runs inside `repos/<name>`. Git steps in the git rule are for this workspace.
+
+The waste tracking phases rule still applies under `repos/`, because it is about those services.
+
+Branch names, commit messages, pull request descriptions, and pull request links each say they do not apply under `repos/`.
+
+Covers: `.rulesync/rules/writing-rules.md`, `.rulesync/rules/git-branches.md`, `.rulesync/rules/branch-names.md`, `.rulesync/rules/commit-messages.md`, `.rulesync/rules/pull-request-descriptions.md`, `.rulesync/rules/pull-request-links.md`, `.rulesync/rules/waste-tracking-phases.md`.
+
+## 84. rulesync takes named arguments
+
+Lewis Magri, 2026-11-26 15:21 UTC
+
+`bin/rulesync/rulesync` takes `--command=import` or `--command=generate`, and `--tool=cursor` or `--tool=claude`. `--delete` removes a generated file the source no longer has. When `--tool` is omitted, the script uses `RULESYNC_TOOL`. The positional forms `cursor`, `claude`, `generate`, and `import` are gone.
+
+The hooks and `install-hooks` call `bin/rulesync/rulesync --command=generate --delete`.
+
+Covers: `bin/rulesync/rulesync`, `bin/rulesync/hooks/`, `bin/rulesync/install-hooks`, `.rulesync/rules/rulesync.md`, `.rulesync/rules/skill-scripts.md`, `.rulesync/skills/rulesync/SKILL.md`, `README.md`.

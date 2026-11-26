@@ -18,9 +18,11 @@ cursor:
 
 This workspace root is the git repository `dwt-agent-workspace`. Service repositories live in `repos/`, which is gitignored. `get-defra-team-repos` saves the logged-in user's DEFRA team repositories. `seed-repos` clones that list into `repos/` and leaves a repository that is already there.
 
-Do not run git unless the user asks in the current request. That includes status, fetch, checkout, branch, commit, rebase, and push.
+The writing rules rule says the workspace rules do not apply to a directory under `repos/`. A command for one of those repositories runs inside `repos/<name>`. Follow that repository.
 
-When they ask, run it in the repository they mean. Service repository commands run inside `repos/<name>`. Commands for this workspace run at the `dwt-agent-workspace` root.
+Do not run git in this workspace unless the user asks in the current request. That includes status, fetch, checkout, branch, commit, rebase, and push. The sections below are for this workspace.
+
+When they ask, run it at the `dwt-agent-workspace` root.
 
 ## Push
 

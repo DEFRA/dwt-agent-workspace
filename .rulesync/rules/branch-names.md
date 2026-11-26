@@ -12,6 +12,8 @@ cursor:
 ---
 # Branch names
 
+This rule applies to `dwt-agent-workspace`. It does not apply to a directory under `repos/`. The writing rules rule says that.
+
 Name a branch from the Jira ticket keys, as written, then a short lowercase slug with hyphens.
 
 One ticket: `DWTC-XXX_short-description`

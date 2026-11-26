@@ -12,6 +12,8 @@ cursor:
 ---
 # Commit messages
 
+This rule applies to `dwt-agent-workspace`. It does not apply to a directory under `repos/`. The writing rules rule says that.
+
 One short subject. Add one sentence in the body only when the subject cannot say why the change was made.
 
 Start with the Jira ticket keys, as written. For more than one ticket, list every key first.

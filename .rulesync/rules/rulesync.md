@@ -34,14 +34,14 @@ Cursor files in `.cursor/` and Claude Code files in `.claude/` and `CLAUDE.md` a
 
 `RULESYNC_TOOL` in `.env` is `cursor` or `claude`. Each person sets their own. `.env` is gitignored.
 
-`bin/rulesync/Dockerfile` builds the `dwt-rulesync` image. `bin/rulesync/rulesync` runs that image with the repository root mounted and the working directory set there. Pass `cursor` or `claude`. Generate writes rules and skills for that tool.
+`bin/rulesync/Dockerfile` builds the `dwt-rulesync` image. `bin/rulesync/rulesync` runs that image with the repository root mounted and the working directory set there. Pass `--command=import` or `--command=generate`, and `--tool=cursor` or `--tool=claude`. Add `--delete` to remove a generated file the source no longer has. When `--tool` is omitted, the script uses `RULESYNC_TOOL`. `claude` selects the `claudecode` target. Generate writes rules and skills for that tool.
 
 After an edit in `.rulesync`, generate the files for `RULESYNC_TOOL`:
 
 ```bash
-bin/rulesync/rulesync generate --delete
+bin/rulesync/rulesync --command=generate --tool=cursor --delete
 ```
 
 The hooks are `bin/rulesync/hooks/`. `bin/rulesync/install-hooks` points Git at that directory and loads the tool files. Each hook calls `bin/rulesync/rulesync`, which runs rulesync in the `dwt-rulesync` image.
 
-After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete` for that tool. Generate deletes the tool files, then writes them from `.rulesync`. A commit leaves `.rulesync` as edited.
+After a checkout, merge, pull, or rebase, the hook runs `bin/rulesync/rulesync --command=generate --delete` for the tool named by `RULESYNC_TOOL`. Generate deletes the tool files, then writes them from `.rulesync`. A commit leaves `.rulesync` as edited.

@@ -37,13 +37,13 @@ That points this clone at `bin/rulesync/hooks/` and generates `.cursor/` or `.cl
 Edit rules in `.rulesync/rules/` and skills in `.rulesync/skills/`. Then generate the files for your tool:
 
 ```bash
-bin/rulesync/rulesync cursor
-bin/rulesync/rulesync claude
+bin/rulesync/rulesync --command=generate --tool=cursor --delete
+bin/rulesync/rulesync --command=generate --tool=claude --delete
 ```
 
-`claude` selects the `claudecode` target. The features are rules and skills. `bin/rulesync/rulesync generate --delete` generates the tool named by `RULESYNC_TOOL`.
+`claude` selects the `claudecode` target. The features are rules and skills. Omit `--tool` to generate the tool named by `RULESYNC_TOOL`.
 
-After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete`, which replaces those tool files from `.rulesync`.
+After a checkout, merge, pull, or rebase, the hook runs `bin/rulesync/rulesync --command=generate --delete`, which replaces those tool files from `.rulesync`.
 
 ## Local folders
 

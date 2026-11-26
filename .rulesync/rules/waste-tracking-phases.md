@@ -16,6 +16,8 @@ cursor:
 ---
 # Waste tracking phases
 
+This rule applies to a directory under `repos/`. The writing rules rule says the other workspace rules do not.
+
 Phase 1 and Phase 2 run together in `waste-movement-external-api` and `waste-movement-backend`. Phase 2 is the direction going forward. Phase 1 stays supported, including its docs.
 
 ## Phase 1 — Receipt of Waste

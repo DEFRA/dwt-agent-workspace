@@ -27,7 +27,7 @@ Use Bash for a simple command sequence.
 
 Use a Dockerfile or a Compose file to run a program a person may want to leave uninstalled. A person can have that program installed. A skill can still run it in Docker.
 
-A skill calls a program by its command name. Use the installed command. When that command is missing, run the program with its Docker skill. `gh` uses the github-cli-via-docker skill. That skill's `bin/gh` is `.rulesync/skills/github-cli-via-docker/bin/gh`. Put that `bin` directory on `PATH` before a script that calls `gh`. `rulesync` is `bin/rulesync/rulesync`. Pass `cursor` or `claude`. The rulesync rule says what that script does. A shell alias is not visible inside a script. Do not write the Docker command into another skill's script.
+A skill calls a program by its command name. Use the installed command. When that command is missing, run the program with its Docker skill. `gh` uses the github-cli-via-docker skill. That skill's `bin/gh` is `.rulesync/skills/github-cli-via-docker/bin/gh`. Put that `bin` directory on `PATH` before a script that calls `gh`. `rulesync` is `bin/rulesync/rulesync`. Pass `--command` and `--tool`. The rulesync rule says the values. A shell alias is not visible inside a script. Do not write the Docker command into another skill's script.
 
 When that program reads or writes files in the workspace, mount the current directory and set the working directory there. The shell expands `$PWD`.
 

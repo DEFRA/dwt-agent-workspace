@@ -3,4 +3,4 @@ set -e
 root=$(git rev-parse --show-toplevel)
 git -C "$root" config core.hooksPath bin/rulesync/hooks
 echo "Git uses the hooks in bin/rulesync/hooks."
-"$root/bin/rulesync/rulesync" generate --delete
+"$root/bin/rulesync/rulesync" --command=generate --delete
