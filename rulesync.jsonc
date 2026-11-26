@@ -1,6 +1,6 @@
 {
   "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/config-schema.json",
   "targets": ["cursor", "claudecode"],
-  "features": ["rules", "skills"],
+  "features": ["rules", "skills", "ignore"],
   "delete": true
 }

@@ -1,0 +1,8 @@
+# This repos .env files are secrets. Templates stay readable.
+.env
+
+# Local test-pack secrets. Templates stay readable.
+repos/*/env.sh
+
+# Local service repositories. Templates stay readable.
+repos/*/.env

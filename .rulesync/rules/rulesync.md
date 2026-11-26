@@ -28,13 +28,15 @@ When the user asks to change a generated Cursor or Claude rule or skill, stop an
 EDIT SHARED RULES IN .RULESYNC/RULES/ AND SHARED SKILLS IN .RULESYNC/SKILLS/. The Cursor and Claude copies are generated. A checkout, merge, pull, or rebase deletes those copies and writes them again from .rulesync. An edit in the generated files is lost when the branch or commit changes.
 ```
 
-Cursor files in `.cursor/` and Claude Code files in `.claude/` and `CLAUDE.md` are generated from that source. A source rule with `root: true` is written to `CLAUDE.md`. `.gitignore` ignores `.cursor/`, `.claude/`, `CLAUDE.md`, and `AGENTS.md`.
+Cursor files in `.cursor/` and Claude Code files in `.claude/` and `CLAUDE.md` are generated from that source. A source rule with `root: true` is written to `CLAUDE.md`. `.gitignore` ignores `.cursor/`, `.cursorignore`, `.claude/`, `CLAUDE.md`, and `AGENTS.md`.
 
 `lib` is a skill. Its modules are the JavaScript the other skills import. Generate writes it to `.cursor/skills/lib/` and `.claude/skills/lib/`. `.rulesync/skills/lib/package.json` sets `"type": "module"`. The other JavaScript skills link their `package.json` to that file. The skill map is `.rulesync/skills/README.md`.
 
 `RULESYNC_TOOL` in `.env` is `cursor` or `claude`. Each person sets their own. `.env` is gitignored.
 
-`bin/rulesync/Dockerfile` builds the `dwt-rulesync` image. `bin/rulesync/rulesync` runs that image with the repository root mounted and the working directory set there. Pass `--command=import` or `--command=generate`, and `--tool=cursor` or `--tool=claude`. Add `--delete` to remove a generated file the source no longer has. When `--tool` is omitted, the script uses `RULESYNC_TOOL`. `claude` selects the `claudecode` target. Generate writes rules and skills for that tool.
+`bin/rulesync/Dockerfile` builds the `dwt-rulesync` image. `bin/rulesync/rulesync` runs that image with the repository root mounted and the working directory set there. Pass `--command=import` or `--command=generate`, and `--tool=cursor` or `--tool=claude`. Add `--delete` to remove a generated file the source no longer has. When `--tool` is omitted, the script uses `RULESYNC_TOOL`. `claude` selects the `claudecode` target. The features are `rules`, `skills`, and `ignore`. Generate writes rules, skills, and the ignore list for that tool.
+
+`.rulesync/.aiignore` is the ignore list. It lists `repos/*/env.sh`, so `env.sh` directly inside any cloned repository is ignored. Generate writes that list to `.cursorignore` for Cursor and to `.claude/settings.json` for Claude Code. `env.sh.template` stays readable.
 
 After an edit in `.rulesync`, generate the files for `RULESYNC_TOOL`:
 

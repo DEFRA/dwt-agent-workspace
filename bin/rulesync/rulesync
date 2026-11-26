@@ -72,4 +72,4 @@ docker run --rm \
   -e HOME=/tmp \
   -v "$ROOT:$ROOT" \
   -w "$ROOT" \
-  dwt-rulesync "$command" --targets "$target" --features rules,skills "$@"
+  dwt-rulesync "$command" --targets "$target" --features rules,skills,ignore "$@"
