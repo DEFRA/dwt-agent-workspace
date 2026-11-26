@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+. "$(CDPATH= cd -- "$(dirname "$0")" && pwd)/common.sh"
+rulesync_paths
+
+if [ "$#" -ne 1 ]; then
+  echo "Usage: bin/rulesync/rulesync cursor|claude" >&2
+  exit 1
+fi
+
+case "$1" in
+  cursor) TARGET=cursor ;;
+  claude) TARGET=claudecode ;;
+  *)
+    echo "Usage: bin/rulesync/rulesync cursor|claude" >&2
+    exit 1
+    ;;
+esac
+
+rulesync_build
+rulesync_run_in "$ROOT" generate --targets "$TARGET"

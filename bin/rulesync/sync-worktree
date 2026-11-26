@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+. "$(CDPATH= cd -- "$(dirname "$0")" && pwd)/common.sh"
+rulesync_paths
+
+if [ "${1:-}" = post-checkout ] && [ "${4:-}" != 1 ]; then
+  exit 0
+fi
+
+rulesync_tool
+"$SCRIPT_DIR/rulesync" "$TOOL"
+rulesync_save_snapshot
