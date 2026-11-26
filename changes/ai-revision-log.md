@@ -685,3 +685,29 @@ After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --del
 `bin/rulesync/common.sh`, `bin/rulesync/import-ai-edits`, and `bin/rulesync/sync-worktree` are gone. `bin/rulesync/rulesync` is the docker command the hooks call.
 
 Covers: `bin/rulesync/rulesync`, `bin/rulesync/hooks/`, `bin/rulesync/install-hooks`, `.cursor/rules/rulesync.mdc`, `.cursor/skills/rulesync/SKILL.md`, `README.md`.
+
+## 80. Agents edit .rulesync
+
+Lewis Magri, 2026-11-26 14:24 UTC
+
+Shared rules and skills are edited in `.rulesync/rules/` and `.rulesync/skills/`. After that edit, generate the Cursor or Claude files for `RULESYNC_TOOL`.
+
+The commit hook is removed. A commit no longer deletes `.rulesync` or runs `rulesync import`. After a checkout, merge, pull, or rebase, the hook still runs `rulesync generate --delete` for that tool.
+
+Covers: `.rulesync/rules/rulesync.md`, `.rulesync/rules/writing-rules.md`, `.rulesync/rules/skill-scripts.md`, `.rulesync/skills/rulesync/SKILL.md`, `bin/rulesync/hooks/pre-commit`, `README.md`.
+
+## 81. Capital-letter reply for generated rule edits
+
+Lewis Magri, 2026-11-26 14:28 UTC
+
+When the user asks to change a generated Cursor or Claude rule or skill, the agent stops and replies in capital letters. The reply says to edit `.rulesync/rules/` and `.rulesync/skills/`, because a checkout, merge, pull, or rebase replaces the generated copies from `.rulesync`. `.cursor/rules/local-machine.mdc` stays editable.
+
+Covers: `.rulesync/rules/rulesync.md`, `.rulesync/skills/rulesync/SKILL.md`.
+
+## 82. Generated-file reply is mixed case
+
+Lewis Magri, 2026-11-26 14:31 UTC
+
+The reply for a request to edit a generated Cursor or Claude rule or skill is no longer all capital letters. The first sentence stays in capital letters. The sentences after it are normal sentences.
+
+Covers: `.rulesync/rules/rulesync.md`, `.rulesync/skills/rulesync/SKILL.md`.

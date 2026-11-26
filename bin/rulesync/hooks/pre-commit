@@ -1,9 +1,0 @@
-#!/bin/sh
-set -e
-root=$(git rev-parse --show-toplevel)
-rm -rf "$root/.rulesync"
-if ! "$root/bin/rulesync/rulesync" import; then
-  git -C "$root" checkout -- .rulesync
-  exit 1
-fi
-git -C "$root" add -A -- .rulesync

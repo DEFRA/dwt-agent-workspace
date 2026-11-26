@@ -14,7 +14,7 @@ cursor:
 
 JavaScript, Bash, and Docker are the approved tools for a skill.
 
-Use JavaScript for complex work and for API requests. Those scripts are vanilla JavaScript in `.rulesync/skills/`. Generate copies them to `.cursor/skills/` and `.claude/skills/`. Those copies are gitignored. The rulesync rule says how an edit in those copies is written back into `.rulesync`. They use ESM and JSDoc. Node is 22.23.4, the version `waste-movement-backend` uses. A newer Node 22 can run them. Scripts use Node built-ins only. There is no install step.
+Use JavaScript for complex work and for API requests. Those scripts are vanilla JavaScript in `.rulesync/skills/`. Edit them there. Generate copies them to `.cursor/skills/` and `.claude/skills/`. Those copies are gitignored. They use ESM and JSDoc. Node is 22.23.4, the version `waste-movement-backend` uses. A newer Node 22 can run them. Scripts use Node built-ins only. There is no install step.
 
 `.rulesync/skills/lib/package.json` sets `"type": "module"`. Each other JavaScript skill links its `package.json` to that file. Generate copies the file into the skill so Node finds it next to the scripts. Run a script with `node` from either generated tree.
 

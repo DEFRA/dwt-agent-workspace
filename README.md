@@ -1,10 +1,10 @@
 # Digital Waste Tracking agent workspace
 
-Shared rules and skills for Cursor and Claude Code. The source is `.rulesync/`. Git hooks generate the files for the tool you use, and they write your edits back into `.rulesync` when you commit.
+Shared rules and skills for Cursor and Claude Code. The source is `.rulesync/`. Edit rules and skills there. Git hooks regenerate the files for the tool you use when the branch or commit changes.
 
 `.rulesync/rules/` is the source for rules. `.rulesync/skills/` is the source for skills. The skill map is `.rulesync/skills/README.md`.
 
-Cursor files are written under `.cursor/`. Claude Code files are written to `.claude/` and `CLAUDE.md`. Those paths are gitignored. Edit the source, or edit the generated files for your tool. The next commit copies generated edits into `.rulesync`.
+Cursor files are written under `.cursor/`. Claude Code files are written to `.claude/` and `CLAUDE.md`. Those paths are gitignored.
 
 ## New clone
 
@@ -34,18 +34,16 @@ That points this clone at `bin/rulesync/hooks/` and generates `.cursor/` or `.cl
 
 ## Day to day
 
-A commit deletes `.rulesync`, imports the Cursor or Claude files named by `RULESYNC_TOOL`, and stages `.rulesync`.
-
-After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete`, which replaces those tool files from `.rulesync`.
-
-Generate one tool yourself with:
+Edit rules in `.rulesync/rules/` and skills in `.rulesync/skills/`. Then generate the files for your tool:
 
 ```bash
 bin/rulesync/rulesync cursor
 bin/rulesync/rulesync claude
 ```
 
-`claude` selects the `claudecode` target. The features are rules and skills.
+`claude` selects the `claudecode` target. The features are rules and skills. `bin/rulesync/rulesync generate --delete` generates the tool named by `RULESYNC_TOOL`.
+
+After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete`, which replaces those tool files from `.rulesync`.
 
 ## Local folders
 
