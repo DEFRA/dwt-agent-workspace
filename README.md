@@ -34,13 +34,9 @@ That points this clone at `bin/rulesync/hooks/` and generates `.cursor/` or `.cl
 
 ## Day to day
 
-After a checkout, merge, pull, or rebase, the hook replaces your tool files from `.rulesync` on that commit.
+A commit deletes `.rulesync`, imports the Cursor or Claude files named by `RULESYNC_TOOL`, and stages `.rulesync`.
 
-A commit writes edits from those tool files back into `.rulesync` and stages them. Edits you made only in `.rulesync` stay there, and the hook reloads the tool files. If both changed since the last sync, the commit stops. Run this to keep `.rulesync` and replace the tool files:
-
-```bash
-bin/rulesync/sync-worktree
-```
+After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete`, which replaces those tool files from `.rulesync`.
 
 Generate one tool yourself with:
 

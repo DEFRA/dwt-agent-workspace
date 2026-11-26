@@ -117,11 +117,12 @@ A merge to `main` mints a new version for that repo. Each service and each test 
 
 ```bash
 node .cursor/skills/edit-jira-release/scripts/edit-release.js \
-  .tmp/jira-releases/48175 \
   --project DWTC \
   --version 48175 \
   --release-notes-file .tmp/jira-releases/48175/release-notes.md
 ```
+
+The script writes the result to `.tmp/jira-releases/<version-id>/`. The generated artifacts rule names that folder.
 
 Add `--description-file`, `--stages`, `--release-date`, `--release-name`, `--tickets`, or `--released` only for a part that should change. `--stages` looks like `Planned,Ext-Test,Released`.
 
@@ -153,7 +154,7 @@ After the release is updated, remind the user to post it in the private Slack ch
 ## Examples
 
 ```
-/edit-jira-release --project DWTC --version 48175 --release-notes-file release-notes.md
+/edit-jira-release --project DWTC --version 48175 --release-notes-file .tmp/jira-releases/48175/release-notes.md
 /edit-jira-release --project DWTC --version 48316 --stages Planned,Ext-Test,Released
 ```
 

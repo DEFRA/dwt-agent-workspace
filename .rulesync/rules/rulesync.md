@@ -1,5 +1,5 @@
 ---
-root: true
+root: false
 targets:
   - '*'
 description: >-
@@ -32,6 +32,8 @@ Cursor files in `.cursor/` and Claude Code files in `.claude/` and `CLAUDE.md` a
 
 `bin/rulesync/Dockerfile` builds the `dwt-rulesync` image. `bin/rulesync/rulesync` runs that image with the repository root mounted and the working directory set there. Pass `cursor` or `claude`. Generate writes rules and skills for that tool.
 
-The hooks are `bin/rulesync/hooks/`. `bin/rulesync/install-hooks` points Git at that directory and loads the tool files. After a checkout, merge, pull, or rebase, the hook runs `bin/rulesync/sync-worktree`. That replaces the tool files from `.rulesync` on that commit.
+The hooks are `bin/rulesync/hooks/`. `bin/rulesync/install-hooks` points Git at that directory and loads the tool files. Each hook calls `bin/rulesync/rulesync`, which runs rulesync in the `dwt-rulesync` image.
 
-A commit runs `bin/rulesync/import-ai-edits`. Edits in the tool files are written into `.rulesync` and staged. Edits in `.rulesync` stay there, and the hook reloads the tool files. When both changed since the last sync, the commit stops. Run `bin/rulesync/sync-worktree` to keep `.rulesync` and replace the tool files.
+A commit deletes `.rulesync`, runs `rulesync import` for `RULESYNC_TOOL`, and stages `.rulesync`.
+
+After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete` for that tool. Generate deletes the tool files, then writes them from `.rulesync`.

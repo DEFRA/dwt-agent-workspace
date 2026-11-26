@@ -20,7 +20,7 @@ Skills in `.cursor/skills/` read and write Jira, Confluence, and minted CDP serv
 
 Credentials come from `.env`. The Atlassian credentials rule says how that file is set up.
 
-Fetched output goes in `.tmp/`. Read those files. Do not guess ticket, release, or page contents from memory.
+Fetched output goes in the folders named by the generated artifacts rule. Read those files. Do not guess ticket, release, or page contents from memory.
 
 A skill that writes to Jira or Confluence drafts locally first. Confirm with the user before that write.
 

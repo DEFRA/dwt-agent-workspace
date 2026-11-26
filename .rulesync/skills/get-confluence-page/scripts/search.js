@@ -1,6 +1,9 @@
 import { pathToFileURL } from 'node:url'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 import { atlassianJson } from '../../lib/atlassian.js'
 import { confluenceBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { confluenceSearchFile } from '../../lib/tmp.js'
 
 function columns (lines) {
   const rows = lines.filter((line) => line !== '').map((line) => line.split('\t'))
@@ -47,7 +50,12 @@ export async function searchText (argv) {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  console.log(await searchText(argv))
+  const text = await searchText([argv[0] || '', argv[1] || '', 'list'])
+  const file = confluenceSearchFile(argv[0] || '', argv[1] || '')
+  mkdirSync(dirname(file), { recursive: true })
+  writeFileSync(file, text.endsWith('\n') ? text : `${text}\n`)
+  console.log(text)
+  console.log(`\nSaved: ${file}`)
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

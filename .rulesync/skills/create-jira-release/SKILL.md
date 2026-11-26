@@ -148,10 +148,7 @@ node .cursor/skills/create-jira-release/scripts/check-existing-release.js \
 ### 4. Create
 
 ```bash
-mkdir -p .tmp/jira-releases/new
-
 node .cursor/skills/create-jira-release/scripts/create-release.js \
-  .tmp/jira-releases/new \
   --project DWTC \
   --release-name "RoW enhancements v1" \
   --release-date 2026-11-24 \
@@ -159,6 +156,8 @@ node .cursor/skills/create-jira-release/scripts/create-release.js \
   --description-file .tmp/jira-releases/new/description.md \
   --release-notes-file .tmp/jira-releases/new/release-notes.md
 ```
+
+The script writes the result to `.tmp/jira-releases/new/`. The generated artifacts rule names that folder.
 
 ### 5. Review output
 
@@ -190,7 +189,7 @@ After the release is created, remind the user to post it in the private Slack ch
 ## Examples
 
 ```
-/create-jira-release --project DWTC --release-name "RoW enhancements v1" --release-date 2026-11-24 --tickets DWTC-259,DWTC-260 --description-file description.md --release-notes-file release-notes.md
+/create-jira-release --project DWTC --release-name "RoW enhancements v1" --release-date 2026-11-24 --tickets DWTC-259,DWTC-260 --description-file .tmp/jira-releases/new/description.md --release-notes-file .tmp/jira-releases/new/release-notes.md
 ```
 
 ## Important constraints

@@ -31,16 +31,16 @@ Jira keeps one rich text section on the release page, separate from the descript
 1. From the repo root, fetch the release. Replace `<version>` with the ID or URL. This runs every read: status, dates, stage, tickets, related work, and the Release Notes section.
 
    ```bash
-   node .cursor/skills/get-jira-release/scripts/fetch-release.js \
-     <version> .tmp/jira-releases/<version-id>
+   node .cursor/skills/get-jira-release/scripts/fetch-release.js <version>
    ```
 
    For project key + version name:
 
    ```bash
-   node .cursor/skills/get-jira-release/scripts/fetch-release.js \
-     DWTC .tmp/jira-releases/<version-id> "RoW enhancements v1"
+   node .cursor/skills/get-jira-release/scripts/fetch-release.js DWTC "RoW enhancements v1"
    ```
+
+   The script writes `.tmp/jira-releases/<version-id>/`. The generated artifacts rule names that folder.
 
    Reads `ATLASSIAN_USER` and `ATLASSIAN_TOKEN` from the workspace `.env`.
 
@@ -64,7 +64,7 @@ Jira keeps one rich text section on the release page, separate from the descript
 
 | Script                  | Purpose                                          |
 | ----------------------- | ------------------------------------------------ |
-| `fetch-release.js`      | Run the full get into one output directory           |
+| `fetch-release.js`      | Write `.tmp/jira-releases/<id>/`                     |
 | `resolve-release-id.js` | Parse version ID from URL, ID, or project + name |
 | `release.js`            | Status, start date, release date, description (`full`, `summary`, `json`) |
 | `release-stages.js`     | Stage list and current stage                         |

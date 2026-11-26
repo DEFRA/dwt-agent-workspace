@@ -1,9 +1,6 @@
 #!/bin/sh
 set -e
-
-. "$(CDPATH= cd -- "$(dirname "$0")" && pwd)/common.sh"
-rulesync_paths
-
-git -C "$ROOT" config core.hooksPath bin/rulesync/hooks
+root=$(git rev-parse --show-toplevel)
+git -C "$root" config core.hooksPath bin/rulesync/hooks
 echo "Git uses the hooks in bin/rulesync/hooks."
-"$SCRIPT_DIR/sync-worktree"
+"$root/bin/rulesync/rulesync" generate --delete

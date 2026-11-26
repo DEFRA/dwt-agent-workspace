@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { graphql, jira, versionAri } from '../../lib/atlassian.js'
 import { errorText, jiraBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { jiraReleaseDir, rejectOutputArg } from '../../lib/tmp.js'
 import { resolveVersion } from './release-sections.js'
 
 const READ_STAGES = `
@@ -21,12 +22,13 @@ const READ_STAGES = `
 /**
  * Read release stages into stages.txt and stages.json.
  * @param {string} input
- * @param {string} outputDir
  * @param {string} [versionName]
  */
-export async function releaseStages (input, outputDir, versionName = '') {
+export async function releaseStages (input, versionName = '') {
+  if (!input) throw new Error('Usage: node release-stages.js <version_id_or_url> [version_name]')
   requireAtlassianEnv()
   const versionId = await resolveVersion(input, versionName)
+  const outputDir = jiraReleaseDir(versionId)
   const version = await jira('GET', `${jiraBaseUrl()}/rest/api/2/version/${versionId}`)
   if (version?.errorMessages) throw new Error(`Error: ${errorText(version)}`)
   const project = await jira('GET', `${jiraBaseUrl()}/rest/api/2/project/${version.projectId}`)
@@ -61,8 +63,9 @@ export async function releaseStages (input, outputDir, versionName = '') {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  if (!argv[0] || !argv[1]) throw new Error('Usage: node release-stages.js <version_id_or_url> <output_dir> [version_name]')
-  await releaseStages(argv[0], argv[1], argv[2] || '')
+  if (!argv[0] || argv.length > 2) throw new Error('Usage: node release-stages.js <version_id_or_url> [version_name]')
+  rejectOutputArg(argv[1] || '')
+  await releaseStages(argv[0], argv[1] || '')
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

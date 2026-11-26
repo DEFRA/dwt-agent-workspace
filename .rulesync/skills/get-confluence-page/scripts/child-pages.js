@@ -3,18 +3,19 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { atlassianJson } from '../../lib/atlassian.js'
 import { confluenceBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { confluencePageDir, rejectOutputArg } from '../../lib/tmp.js'
 import { pageText } from './page.js'
 
 /**
  * Write child pages under a Confluence page.
+ * Writes `.tmp/confluence-pages/<id>/children`.
  * @param {string} pageId
- * @param {string} outputDir
  */
-export async function childPages (pageId, outputDir) {
-  if (!pageId || !outputDir) throw new Error('Usage: node child-pages.js PAGE_ID <output_dir>')
+export async function childPages (pageId) {
+  if (!pageId) throw new Error('Usage: node child-pages.js PAGE_ID')
   requireAtlassianEnv()
   const maxChildren = process.env.CONFLUENCE_MAX_CHILDREN || '10'
-  const childrenDir = join(outputDir, 'children')
+  const childrenDir = join(confluencePageDir(pageId), 'children')
   mkdirSync(childrenDir, { recursive: true })
   const response = await atlassianJson(`${confluenceBaseUrl()}/rest/api/content/${pageId}/child/page?limit=${maxChildren}&expand=page`)
   if (response?.statusCode) throw new Error(response.message || 'Unknown error')
@@ -40,7 +41,8 @@ export async function childPages (pageId, outputDir) {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  await childPages(argv[0] || '', argv[1] || '')
+  rejectOutputArg(argv[1] || '')
+  await childPages(argv[0] || '')
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

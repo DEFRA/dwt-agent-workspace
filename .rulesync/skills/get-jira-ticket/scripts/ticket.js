@@ -1,6 +1,9 @@
 import { pathToFileURL } from 'node:url'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { jira } from '../../lib/atlassian.js'
 import { jiraBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { jiraTicketDir, rejectOutputArg } from '../../lib/tmp.js'
 
 function columns (lines) {
   const rows = lines.filter((line) => line !== '').map((line) => line.split('\t'))
@@ -58,7 +61,7 @@ export async function ticketText (ticket, format = 'full') {
   if (attachments.length) {
     lines.push('', `=== Attachments (${attachments.length}) ===`)
     lines.push(columns(attachments.map((item) => `${item.id}\t${item.filename}\t${item.mimeType}\t${item.size} bytes`)))
-    lines.push('', `Download with: node .cursor/skills/get-jira-ticket/scripts/attachments.js '${ticket}' .tmp/jira-tickets/${ticket}/attachments`)
+    lines.push('', `Download with: node .cursor/skills/get-jira-ticket/scripts/attachments.js '${ticket}'`)
   }
   const subtasks = issue.fields.subtasks || []
   if (subtasks.length) {
@@ -79,7 +82,19 @@ export async function ticketText (ticket, format = 'full') {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  console.log(await ticketText(argv[0] || '', argv[1] || 'full'))
+  const format = argv[1] || 'full'
+  rejectOutputArg(format === 'summary' || format === 'json' || format === 'full' ? '' : format)
+  if (format === 'summary') {
+    console.log(await ticketText(argv[0] || '', 'summary'))
+    return
+  }
+  if (argv.length > 1) throw new Error('Usage: node fetch-ticket.js DWT-XXXX\n   or: node ticket.js DWT-XXXX summary')
+  const ticket = argv[0] || ''
+  const dir = jiraTicketDir(ticket)
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(join(dir, 'ticket.txt'), (await ticketText(ticket, 'full')) + '\n')
+  writeFileSync(join(dir, 'ticket.json'), (await ticketText(ticket, 'json')) + '\n')
+  console.log(`Saved ticket in ${dir}`)
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

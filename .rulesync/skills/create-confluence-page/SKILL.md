@@ -26,7 +26,7 @@ If the parent is not provided, ask the user. Optionally verify it exists:
 node .cursor/skills/get-confluence-page/scripts/page.js <parent_id_or_url> summary
 
 # Folder parent
-node .cursor/skills/get-confluence-page/scripts/folder-contents.js <folder_id_or_url> .tmp/confluence-folders/<folder-id>
+node .cursor/skills/get-confluence-page/scripts/folder-contents.js <folder_id_or_url>
 ```
 
 The new page inherits the parent's space. Pages can be created under a **page or folder** parent.

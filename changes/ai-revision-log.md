@@ -633,3 +633,55 @@ An agent does not read or write `.rulesync` unless it is actively debugging or u
 `.cursor/rules/writing-rules.mdc` no longer tells an agent to edit `.rulesync/rules/`. It points at the rulesync rule.
 
 Covers: `.cursor/rules/rulesync.mdc`, `.cursor/rules/writing-rules.mdc`.
+
+## 75. One .tmp layout for fetches and drafts
+
+Lewis Magri, 2026-11-26 13:37 UTC
+
+Fetched Jira, Confluence, and GitHub output, and drafts for a release or a Confluence page, use the folders in `.cursor/rules/generated-artifacts.mdc`. A script writes the fetch. It does not take an output directory, and the caller does not redirect it into another path. A ticket stays in `.tmp/jira-tickets/<KEY>/`, including when it was fetched for a release.
+
+`.tmp/release-notes/` is not a fetch folder. `.tmp/rulesync-sync-base/` and `.tmp/rulesync-tool` stay with rulesync.
+
+Covers: `.cursor/rules/generated-artifacts.mdc`, `.cursor/rules/atlassian-skills.mdc`, `.cursor/skills/lib/tmp.js`, `.cursor/skills/get-jira-ticket/`, `.cursor/skills/get-jira-release/`, `.cursor/skills/get-confluence-page/`, `.cursor/skills/get-pr-service-version/`, `.cursor/skills/create-jira-release/`, `.cursor/skills/edit-jira-release/`, `.cursor/skills/create-confluence-page/`.
+
+## 76. Rulesync does not write under .tmp
+
+Lewis Magri, 2026-11-26 13:43 UTC
+
+`.tmp/rulesync-sync-base/` was a copy of `.rulesync` kept for the commit hook. `.tmp/rulesync-tool` recorded which tool that copy was for. `.tmp/skill-tests/` was a leftover release-description dry run. None of these are fetches.
+
+The last sync now lives in the git directory, at `rulesync/sync-base` and `rulesync/tool` under that directory. The compare directory for a commit is a temporary directory, removed when the hook finishes. Rulesync does not write under `.tmp`.
+
+Covers: `bin/rulesync/common.sh`, `bin/rulesync/import-ai-edits`, `.cursor/rules/rulesync.mdc`, `.cursor/rules/generated-artifacts.mdc`.
+
+## 77. A commit does not generate in /tmp
+
+Lewis Magri, 2026-11-26 13:48 UTC
+
+The commit hook generated a second project under `/tmp` so it would not overwrite the tool files. That copy had no `.rulesync`, and the commit stopped.
+
+A commit now generates inside the last-sync copy in the git directory, then compares that result with the tool files in the repository. It does not copy the project to `/tmp` or `.tmp`.
+
+Covers: `bin/rulesync/import-ai-edits`, `.cursor/rules/rulesync.mdc`.
+
+## 78. Commit imports, checkout generates
+
+Lewis Magri, 2026-11-26 13:54 UTC
+
+A commit writes the `RULESYNC_TOOL` files into `.rulesync` and stages them. It does not compare those files with an earlier copy, and it does not keep a sync snapshot.
+
+After a checkout, merge, pull, or rebase, the hook generates the `RULESYNC_TOOL` files from `.rulesync`.
+
+Covers: `bin/rulesync/import-ai-edits`, `bin/rulesync/sync-worktree`, `bin/rulesync/common.sh`, `.cursor/rules/rulesync.mdc`, `README.md`.
+
+## 79. Hooks only call rulesync
+
+Lewis Magri, 2026-11-26 14:00 UTC
+
+The commit hook deletes `.rulesync`, runs `rulesync import` for `RULESYNC_TOOL`, and stages `.rulesync`. Import does not delete leftover source files, so the directory is removed first. If that import fails, the hook restores `.rulesync` from git.
+
+After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete` for that tool. Generate deletes the tool files, then writes them from `.rulesync`.
+
+`bin/rulesync/common.sh`, `bin/rulesync/import-ai-edits`, and `bin/rulesync/sync-worktree` are gone. `bin/rulesync/rulesync` is the docker command the hooks call.
+
+Covers: `bin/rulesync/rulesync`, `bin/rulesync/hooks/`, `bin/rulesync/install-hooks`, `.cursor/rules/rulesync.mdc`, `.cursor/skills/rulesync/SKILL.md`, `README.md`.

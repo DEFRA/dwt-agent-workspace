@@ -61,7 +61,8 @@ export async function pageText (input, format = 'full') {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  console.log(await pageText(argv[0] || '', argv[1] || 'full'))
+  if (argv[1] !== 'summary') throw new Error('Usage: node fetch-page.js PAGE_ID_OR_URL\n   or: node page.js PAGE_ID_OR_URL summary')
+  console.log(await pageText(argv[0] || '', 'summary'))
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

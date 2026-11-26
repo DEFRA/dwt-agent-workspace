@@ -6,7 +6,7 @@ targets:
 ---
 # Get Jira ticket
 
-Fetches a single issue and related context to `.tmp/jira-tickets/<ticket>/`. Used by release notes, UAT test creation, and ad-hoc analysis.
+Fetches a single issue and related context to `.tmp/jira-tickets/<ticket>/`. The generated artifacts rule names that folder. Used by release notes, UAT test creation, and ad-hoc analysis.
 
 ## Parameters
 
@@ -14,18 +14,10 @@ Fetches a single issue and related context to `.tmp/jira-tickets/<ticket>/`. Use
 
 ## Steps
 
-1. From the repo root, create the output directory and run all scripts. Replace `<ticket>` with the ticket ID (e.g. `DWT-624`):
+1. From the repo root, fetch the ticket. Replace `<ticket>` with the ticket ID (e.g. `DWT-624`). The script writes `.tmp/jira-tickets/<ticket>/`.
 
    ```bash
-   mkdir -p .tmp/jira-tickets/<ticket>/attachments
-
-   node .cursor/skills/get-jira-ticket/scripts/ticket.js <ticket> full > .tmp/jira-tickets/<ticket>/ticket.txt
-   node .cursor/skills/get-jira-ticket/scripts/ticket.js <ticket> json > .tmp/jira-tickets/<ticket>/ticket.json
-   node .cursor/skills/get-jira-ticket/scripts/comments.js <ticket> list > .tmp/jira-tickets/<ticket>/comments.txt
-   node .cursor/skills/get-jira-ticket/scripts/comments.js <ticket> json > .tmp/jira-tickets/<ticket>/comments.json
-   node .cursor/skills/get-jira-ticket/scripts/attachments.js <ticket> .tmp/jira-tickets/<ticket>/attachments
-   node .cursor/skills/get-jira-ticket/scripts/github-dev.js <ticket> .tmp/jira-tickets/<ticket>
-   node .cursor/skills/get-jira-ticket/scripts/related-tickets.js <ticket> .tmp/jira-tickets/<ticket>
+   node .cursor/skills/get-jira-ticket/scripts/fetch-ticket.js <ticket>
    ```
 
    Reads `ATLASSIAN_USER` and `ATLASSIAN_TOKEN` from the workspace `.env`.
@@ -54,7 +46,8 @@ Fetches a single issue and related context to `.tmp/jira-tickets/<ticket>/`. Use
 
 | Script               | Purpose                                                                          |
 | -------------------- | -------------------------------------------------------------------------------- |
-| `ticket.js`          | Issue details                                                                    |
+| `fetch-ticket.js`    | Write the ticket folder: issue, comments, attachments, GitHub, related, epic   |
+| `ticket.js`          | Issue details. `summary` prints and does not save.                              |
 | `comments.js`        | Issue comments                                                                   |
 | `attachments.js`     | Download attachment files                                                        |
 | `github-dev.js`      | GitHub PRs, commits, changed files, and CI builds (Jira dev-status API)          |

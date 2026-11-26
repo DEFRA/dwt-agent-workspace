@@ -21,4 +21,4 @@ The hooks are `bin/rulesync/hooks/`. Install them once per clone. That points Gi
 bin/rulesync/install-hooks
 ```
 
-After a checkout, merge, pull, or rebase, the hook loads `.rulesync` from that commit into the tool files. A commit writes tool edits back into `.rulesync`.
+A commit deletes `.rulesync`, runs `rulesync import` for `RULESYNC_TOOL`, and stages `.rulesync`. After a checkout, merge, pull, or rebase, the hook runs `rulesync generate --delete` for that tool.

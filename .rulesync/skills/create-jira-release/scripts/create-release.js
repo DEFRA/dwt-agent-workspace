@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { join } from 'node:path'
 import { jira } from '../../lib/atlassian.js'
 import { errorText, jiraBaseUrl, loadWorkspaceEnv, requireAtlassianEnv } from '../../lib/env.js'
+import { jiraReleaseDir } from '../../lib/tmp.js'
 import { formatDescription } from '../../lib/markdown.js'
 import { assignIssues } from './assign-issues.js'
 import { checkExistingRelease } from './check-existing-release.js'
@@ -18,7 +19,7 @@ import { writeReleaseNotes } from './write-release-notes.js'
 function parseArgs (argv) {
   if (!argv.length) usage()
   const options = {
-    outputDir: argv[0],
+    outputDir: jiraReleaseDir('new'),
     project: '',
     name: '',
     tickets: '',
@@ -35,7 +36,7 @@ function parseArgs (argv) {
     relatedWorkTitle: '',
     relatedWorkCategory: process.env.JIRA_RELATED_WORK_CATEGORY || 'Documentation'
   }
-  for (let index = 1; index < argv.length; index += 1) {
+  for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
     const next = () => argv[++index]
     if (arg === '--project') options.project = next()
@@ -61,7 +62,7 @@ function parseArgs (argv) {
 function usage () {
   throw new Error([
     'Usage:',
-    '  node create-release.js <output_dir> --project DWTC --release-name "RoW enhancements v1" \\',
+    '  node create-release.js --project DWTC --release-name "RoW enhancements v1" \\',
     '    --release-date 2026-11-24 --tickets "DWTC-259,DWTC-260" \\',
     '    --description-file description.md --release-notes-file release-notes.md \\',
     '    [--stages "Planned,Ext-Test,Released"]'

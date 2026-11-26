@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
 root=$(git rev-parse --show-toplevel)
-exec "$root/bin/rulesync/sync-worktree" post-merge "$@"
+"$root/bin/rulesync/rulesync" generate --delete

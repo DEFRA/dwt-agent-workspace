@@ -3,24 +3,26 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { jira } from '../../lib/atlassian.js'
 import { jiraBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { jiraTicketDir, rejectOutputArg } from '../../lib/tmp.js'
 import { commentsText } from './comments.js'
 import { epicIssuesText } from './epic-issues.js'
 import { ticketText } from './ticket.js'
 
 /**
  * Write parent, linked issues, subtasks, and epic context.
- * Requires ticket.json from ticket.js.
+ * Requires ticket.json from fetch-ticket.js.
+ * Writes `.tmp/jira-tickets/<KEY>/related` and `epic`.
  * @param {string} ticket
- * @param {string} outputDir
  */
-export async function relatedTickets (ticket, outputDir) {
-  if (!ticket || !outputDir) throw new Error('Usage: node related-tickets.js DWT-XXXX <output_dir>')
+export async function relatedTickets (ticket) {
+  if (!ticket) throw new Error('Usage: node related-tickets.js DWT-XXXX')
+  const outputDir = jiraTicketDir(ticket)
   const ticketJsonPath = join(outputDir, 'ticket.json')
   let ticketJson
   try {
     ticketJson = JSON.parse(readFileSync(ticketJsonPath, 'utf8'))
   } catch {
-    throw new Error(`Error: ${ticketJsonPath} not found — run ticket.js first`)
+    throw new Error(`Error: ${ticketJsonPath} not found — run fetch-ticket.js first`)
   }
   requireAtlassianEnv()
   const maxRelated = Number(process.env.JIRA_MAX_RELATED || 10)
@@ -85,7 +87,8 @@ export async function relatedTickets (ticket, outputDir) {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  await relatedTickets(argv[0] || '', argv[1] || '')
+  rejectOutputArg(argv[1] || '')
+  await relatedTickets(argv[0] || '')
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { atlassianJson } from '../../lib/atlassian.js'
 import { confluenceBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { confluenceFolderDir, rejectOutputArg } from '../../lib/tmp.js'
 import { pageText } from './page.js'
 import { resolveContentId } from './resolve-content-id.js'
 
@@ -22,15 +23,16 @@ function columns (lines) {
 
 /**
  * Write a Confluence folder and the pages inside it.
+ * Writes `.tmp/confluence-folders/<id>/`.
  * @param {string} folderInput
- * @param {string} outputDir
  */
-export async function folderContents (folderInput, outputDir) {
-  if (!folderInput || !outputDir) throw new Error('Usage: node folder-contents.js FOLDER_ID_OR_URL <output_dir>')
+export async function folderContents (folderInput) {
+  if (!folderInput) throw new Error('Usage: node folder-contents.js FOLDER_ID_OR_URL')
   requireAtlassianEnv()
   const base = confluenceBaseUrl()
   const maxPages = Number(process.env.CONFLUENCE_MAX_FOLDER_PAGES || 50)
   const folderId = resolveContentId(folderInput)
+  const outputDir = confluenceFolderDir(folderId)
   const pagesDir = join(outputDir, 'pages')
   mkdirSync(pagesDir, { recursive: true })
   const folder = await atlassianJson(`${base}/rest/api/content/${folderId}?expand=space,version,ancestors`)
@@ -89,7 +91,8 @@ export async function folderContents (folderInput, outputDir) {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  await folderContents(argv[0] || '', argv[1] || '')
+  rejectOutputArg(argv[1] || '')
+  await folderContents(argv[0] || '')
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

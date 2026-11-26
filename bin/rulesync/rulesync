@@ -1,22 +1,56 @@
 #!/bin/sh
 set -e
 
-. "$(CDPATH= cd -- "$(dirname "$0")" && pwd)/common.sh"
-rulesync_paths
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: bin/rulesync/rulesync cursor|claude" >&2
+if [ "$#" -lt 1 ]; then
+  echo "Usage: bin/rulesync/rulesync import|generate [--delete]|cursor|claude" >&2
   exit 1
 fi
 
 case "$1" in
-  cursor) TARGET=cursor ;;
-  claude) TARGET=claudecode ;;
+  cursor)
+    command=generate
+    tool=cursor
+    shift
+    ;;
+  claude)
+    command=generate
+    tool=claude
+    shift
+    ;;
+  import|generate)
+    command=$1
+    shift
+    tool=${RULESYNC_TOOL-}
+    if [ -z "$tool" ] && [ -f "$ROOT/.env" ]; then
+      tool=$(sed -n 's/^RULESYNC_TOOL=//p' "$ROOT/.env" | tail -n 1 | tr -d '\r')
+      tool=${tool#\"}
+      tool=${tool%\"}
+      tool=${tool#\'}
+      tool=${tool%\'}
+    fi
+    ;;
   *)
-    echo "Usage: bin/rulesync/rulesync cursor|claude" >&2
+    echo "Usage: bin/rulesync/rulesync import|generate [--delete]|cursor|claude" >&2
     exit 1
     ;;
 esac
 
-rulesync_build
-rulesync_run_in "$ROOT" generate --targets "$TARGET"
+case "$tool" in
+  cursor) target=cursor ;;
+  claude) target=claudecode ;;
+  *)
+    echo "Set RULESYNC_TOOL=cursor or RULESYNC_TOOL=claude in .env." >&2
+    exit 1
+    ;;
+esac
+
+docker build -t dwt-rulesync -f "$SCRIPT_DIR/Dockerfile" "$SCRIPT_DIR"
+docker run --rm \
+  -u "$(id -u):$(id -g)" \
+  -e HOME=/tmp \
+  -v "$ROOT:$ROOT" \
+  -w "$ROOT" \
+  dwt-rulesync "$command" --targets "$target" --features rules,skills "$@"

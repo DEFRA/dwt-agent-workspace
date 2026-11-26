@@ -6,7 +6,7 @@ targets:
 ---
 # Get Confluence page
 
-Read-only fetch of Confluence pages, folders, or search results to `.tmp/confluence-*`.
+Read-only fetch of Confluence pages, folders, or search results. The generated artifacts rule names the folders.
 
 ## Parameters
 
@@ -36,12 +36,10 @@ Otherwise                   → Page workflow (step 3)
 ### 1. Folder workflow
 
 ```bash
-mkdir -p .tmp/confluence-folders/<folder-id>
-
-node .cursor/skills/get-confluence-page/scripts/folder-contents.js \
-  <folder_id_or_url> \
-  .tmp/confluence-folders/<folder-id>
+node .cursor/skills/get-confluence-page/scripts/folder-contents.js <folder_id_or_url>
 ```
+
+The script writes `.tmp/confluence-folders/<folder-id>/`.
 
 Output: `.tmp/confluence-folders/<folder-id>/`
 
@@ -59,11 +57,10 @@ Default max **50 pages**. Raise with `CONFLUENCE_MAX_FOLDER_PAGES=<n>`.
 Only when the user gives a search term, not a URL or ID:
 
 ```bash
-mkdir -p .tmp/confluence-searches
-
-node .cursor/skills/get-confluence-page/scripts/search.js "<query>" [space_key] \
-  > ".tmp/confluence-searches/<query-slug>.txt"
+node .cursor/skills/get-confluence-page/scripts/search.js "<query>" [space_key]
 ```
+
+The script writes `.tmp/confluence-searches/<query-slug>.txt`. A space key is part of the file name.
 
 Use a filesystem-safe slug from the query (e.g. `release-runbook`). Show results; ask the user which page or folder to fetch; then run step 1 or 3.
 
@@ -74,12 +71,10 @@ Each search gets its own file — searches do not overwrite each other.
 For a single page URL or ID:
 
 ```bash
-mkdir -p .tmp/confluence-pages/<page-id>
-
-node .cursor/skills/get-confluence-page/scripts/page.js <page_id_or_url> full > .tmp/confluence-pages/<page-id>/page.txt
-node .cursor/skills/get-confluence-page/scripts/page.js <page_id_or_url> json > .tmp/confluence-pages/<page-id>/page.json
-node .cursor/skills/get-confluence-page/scripts/child-pages.js <page-id> .tmp/confluence-pages/<page-id>
+node .cursor/skills/get-confluence-page/scripts/fetch-page.js <page_id_or_url>
 ```
+
+The script writes `.tmp/confluence-pages/<page-id>/`. `page.js <page_id_or_url> summary` prints a short summary and does not save a file.
 
 Output: `.tmp/confluence-pages/<page-id>/`
 
@@ -111,9 +106,10 @@ After a successful fetch:
 
 | Script                  | Purpose                                       |
 | ----------------------- | --------------------------------------------- |
-| `page.js`               | Fetch one page by ID or URL                   |
+| `fetch-page.js`         | Write one page and its child pages            |
+| `page.js`               | `summary` prints one page and does not save   |
 | `folder-contents.js`    | Fetch folder metadata and all pages inside it |
-| `search.js`             | Find pages by title/body text                 |
+| `search.js`             | Find pages by title/body text and save the list |
 | `child-pages.js`        | Fetch child pages under a page                |
 | `resolve-content-id.js` | Parse numeric ID from page or folder URL      |
 

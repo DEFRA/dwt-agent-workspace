@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { jira } from '../../lib/atlassian.js'
 import { errorText, jiraBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { jiraReleaseDir, rejectOutputArg } from '../../lib/tmp.js'
 import { resolveVersion } from './release-sections.js'
 
 function columns (lines) {
@@ -22,13 +23,13 @@ function columns (lines) {
 /**
  * Write the tickets on a fix version.
  * @param {string} input
- * @param {string} outputDir
  * @param {string} [versionName]
  */
-export async function releaseIssues (input, outputDir, versionName = '') {
-  if (!input || !outputDir) throw new Error('Usage: node release-issues.js <version_id_or_url> <output_dir> [version_name]')
+export async function releaseIssues (input, versionName = '') {
+  if (!input) throw new Error('Usage: node release-issues.js <version_id_or_url> [version_name]')
   requireAtlassianEnv()
   const versionId = await resolveVersion(input, versionName)
+  const outputDir = jiraReleaseDir(versionId)
   mkdirSync(outputDir, { recursive: true })
   const version = await jira('GET', `${jiraBaseUrl()}/rest/api/2/version/${versionId}`)
   if (version?.errorMessages) throw new Error(`Error: ${errorText(version)}`)
@@ -98,7 +99,9 @@ export async function releaseIssues (input, outputDir, versionName = '') {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  await releaseIssues(argv[0], argv[1], argv[2] || '')
+  if (!argv[0] || argv.length > 2) throw new Error('Usage: node release-issues.js <version_id_or_url> [version_name]')
+  rejectOutputArg(argv[1] || '')
+  await releaseIssues(argv[0], argv[1] || '')
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

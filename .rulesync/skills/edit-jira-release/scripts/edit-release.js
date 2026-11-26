@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { join } from 'node:path'
 import { jira } from '../../lib/atlassian.js'
 import { errorText, jiraBaseUrl, loadWorkspaceEnv, requireAtlassianEnv } from '../../lib/env.js'
+import { jiraReleaseDir } from '../../lib/tmp.js'
 import { formatDescription } from '../../lib/markdown.js'
 import { resolveReleaseId } from '../../get-jira-release/scripts/resolve-release-id.js'
 import { assignIssues } from '../../create-jira-release/scripts/assign-issues.js'
@@ -17,7 +18,7 @@ export async function editRelease (argv) {
   if (!argv.length) usage()
   loadWorkspaceEnv()
   const options = {
-    outputDir: argv[0],
+    outputDir: '',
     project: '',
     name: '',
     version: '',
@@ -31,7 +32,7 @@ export async function editRelease (argv) {
     released: false,
     dryRun: false
   }
-  for (let index = 1; index < argv.length; index += 1) {
+  for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
     const next = () => argv[++index]
     if (arg === '--project') options.project = next()
@@ -59,6 +60,8 @@ export async function editRelease (argv) {
   }
   requireAtlassianEnv(2)
   const projectKey = options.project.toUpperCase()
+  const versionId = await resolveReleaseId(options.version)
+  options.outputDir = jiraReleaseDir(versionId)
   mkdirSync(options.outputDir, { recursive: true })
   let formattedFile = ''
   if (options.descriptionFile || options.descriptionText) {
@@ -76,7 +79,6 @@ export async function editRelease (argv) {
   if (options.releaseNotesFile) {
     try { readFileSync(options.releaseNotesFile) } catch { throw new Error(`Error: release notes file not found: ${options.releaseNotesFile}`) }
   }
-  const versionId = await resolveReleaseId(options.version)
   if (options.dryRun) {
     console.log('Dry run — no Jira changes made')
     console.log(`  Project: ${projectKey}`)
@@ -144,7 +146,7 @@ export async function editRelease (argv) {
 function usage () {
   throw new Error([
     'Usage:',
-    '  node edit-release.js <output_dir> --project DWTC --version 48175 \\',
+    '  node edit-release.js --project DWTC --version 48175 \\',
     '    [--release-name "New name"] [--release-date 2026-11-24] \\',
     '    [--description-file description.md] [--release-notes-file release-notes.md] \\',
     '    [--stages "Planned,Ext-Test,Released"] [--tickets "DWTC-259"] [--released] [--dry-run]'

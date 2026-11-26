@@ -3,15 +3,16 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { jira } from '../../lib/atlassian.js'
 import { jiraBaseUrl, requireAtlassianEnv } from '../../lib/env.js'
+import { jiraTicketDir, rejectOutputArg } from '../../lib/tmp.js'
 
 /**
- * Write GitHub development data linked from a Jira issue.
+ * Write GitHub development data linked from a Jira issue into `.tmp/jira-tickets/<KEY>/`.
  * @param {string} ticket
- * @param {string} outputDir
  */
-export async function githubDev (ticket, outputDir) {
-  if (!ticket || !outputDir) throw new Error('Usage: node github-dev.js DWT-XXXX <output_dir>')
+export async function githubDev (ticket) {
+  if (!ticket) throw new Error('Usage: node github-dev.js DWT-XXXX')
   requireAtlassianEnv()
+  const outputDir = jiraTicketDir(ticket)
   mkdirSync(outputDir, { recursive: true })
   let issueId = ''
   const ticketJson = join(outputDir, 'ticket.json')
@@ -59,7 +60,8 @@ export async function githubDev (ticket, outputDir) {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   Promise.resolve((async (argv) => {
-  await githubDev(argv[0] || '', argv[1] || '')
+  rejectOutputArg(argv[1] || '')
+  await githubDev(argv[0] || '')
 })(process.argv.slice(2))).catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)

@@ -4,13 +4,23 @@
 set -euo pipefail
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
+root=$(cd "$script_dir/../../../.." && pwd)
 input=${1:-}
-output_dir=${2:-}
 
-if [[ -z "$input" || ! -f "$input" ]]; then
-  echo 'Usage: bash pr-versions-from-file.sh <file> [output_dir]' >&2
+if [[ -z "$input" || ! -f "$input" || -n "${2:-}" ]]; then
+  echo 'Usage: bash pr-versions-from-file.sh .tmp/jira-tickets/<KEY>/github.txt' >&2
   exit 1
 fi
+
+input=$(cd "$(dirname "$input")" && pwd)/$(basename "$input")
+case "$input" in
+  "$root"/.tmp/jira-tickets/*/github.txt) ;;
+  *)
+    echo 'Error: pass .tmp/jira-tickets/<KEY>/github.txt. Service versions are saved in that ticket folder.' >&2
+    exit 1
+    ;;
+esac
+output_dir=$(dirname "$input")
 
 mapfile -t urls < <(grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' "$input" | sort -u)
 
@@ -42,9 +52,6 @@ for url in "${urls[@]}"; do
     version=
   fi
   texts+="${text}"$'\n\n'
-  if [[ "$output_dir" == "" ]]; then
-    printf '%s\n\n' "$text"
-  fi
   escaped_url=$(json_escape "$url")
   escaped_text=$(json_escape "$text")
   escaped_version=$(json_escape "$version")
@@ -58,21 +65,17 @@ done
 json+=$'\n'']'$'\n'
 summary="Resolved ${found} PR(s), ${failed} failed"
 
-if [[ -n "$output_dir" ]]; then
-  mkdir -p "$output_dir"
-  fetched=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  {
-    echo '=== Service versions summary ==='
-    echo "Source: ${input}"
-    echo "Fetched: ${fetched}"
-    echo "$summary"
-    echo
-    printf '%s' "$texts"
-  } > "$output_dir/service-versions.txt"
-  printf '%s' "$json" > "$output_dir/service-versions.json"
+mkdir -p "$output_dir"
+fetched=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+{
+  echo '=== Service versions summary ==='
+  echo "Source: ${input}"
+  echo "Fetched: ${fetched}"
   echo "$summary"
-  echo "Saved: $output_dir/service-versions.txt"
-  echo "Saved: $output_dir/service-versions.json"
-else
-  echo "$summary"
-fi
+  echo
+  printf '%s' "$texts"
+} > "$output_dir/service-versions.txt"
+printf '%s' "$json" > "$output_dir/service-versions.json"
+echo "$summary"
+echo "Saved: $output_dir/service-versions.txt"
+echo "Saved: $output_dir/service-versions.json"

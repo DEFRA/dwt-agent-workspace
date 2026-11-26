@@ -36,20 +36,16 @@ The script calls `gh`. That login is what can read the DEFRA organisation. The s
 bash .cursor/skills/get-pr-service-version/scripts/pr-version.sh <pr_url>
 ```
 
-Save output when working from a ticket:
-
-```bash
-bash .cursor/skills/get-pr-service-version/scripts/pr-version.sh <pr_url> \
-  | tee -a .tmp/jira-tickets/<ticket>/service-versions.txt
-```
+A single pull request prints to the terminal. It is not saved as its own folder.
 
 ### All PRs from a Jira fetch
 
 ```bash
 bash .cursor/skills/get-pr-service-version/scripts/pr-versions-from-file.sh \
-  .tmp/jira-tickets/<ticket>/github.txt \
-  .tmp/jira-tickets/<ticket>
+  .tmp/jira-tickets/<ticket>/github.txt
 ```
+
+The script writes `service-versions.txt` and `service-versions.json` in that ticket folder. The generated artifacts rule names the folder.
 
 Writes:
 
@@ -100,8 +96,7 @@ After fetching DWTA-180:
 
 ```bash
 bash .cursor/skills/get-pr-service-version/scripts/pr-versions-from-file.sh \
-  .tmp/jira-tickets/DWTA-180/github.txt \
-  .tmp/jira-tickets/DWTA-180
+  .tmp/jira-tickets/DWTA-180/github.txt
 ```
 
 ## Related skills
