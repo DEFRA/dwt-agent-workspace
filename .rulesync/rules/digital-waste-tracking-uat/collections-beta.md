@@ -1,0 +1,58 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. Collections beta (beta-1, beta-2, beta-3,
+  ...) test conventions for National Waste Movements
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.test.js'
+  - 'repos/digital-waste-tracking-uat/**/test/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/specs/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/test-data-manager.js'
+  - 'repos/digital-waste-tracking-uat/**/wasteMovementExternalApi.js'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. Collections beta (beta-1, beta-2, beta-3,
+    ...) test conventions for National Waste Movements
+---
+# Collections beta
+
+The collections API (National Waste Movements) is versioned `beta-1`, `beta-2`, `beta-3`, and later versions the same way. Each version has its own client, generators, and test folder.
+
+## Layout
+
+- Tests live in `test/specs/WasteMovementExternalAPI/phase-2/beta-<n>/`. The version folder is kebab-case.
+- A feature folder under the version is PascalCase (`phase-2/beta-2/Movement/producer.test.js`).
+- A version with no feature folders keeps behavior files directly in the version folder (`phase-2/beta-1/create-collection.test.js`).
+
+## Client and data
+
+- Call `globalThis.apis.wasteMovementExternalAPI.beta<n>` with no hyphen (`beta1`, `beta2`).
+- Build payloads from the matching `beta<n>` object in `test/support/test-data-manager.js`.
+- A base holds the required fields for that endpoint. Assign further objects onto it. Delete or update fields for the scenario under test.
+- Beta-1 payloads include the run-scoped `apiCode` in the body (`API_CODE` from global setup, exposed as `globalThis.testConfig.apiCode`). From beta-2, the client sends that value as the `x-api-code` header and payloads must not include `apiCode`. A body that still contains it is rejected (`NotAllowed`, pointer `/apiCode`). A missing header is 401 with `detail` `The x-api-code header is required`. An unrecognised header is 401 with `detail` `The x-api-code header does not contain a valid API code`. Neither response has an `errors` array. Do not invent an API code inside a test, except an unrecognised code for that scenario. Pass `null` as the `apiCode` argument to omit the header.
+
+## Beta-1 lifecycle
+
+`beta1` generators: `generateBaseMovementData`, `generateBaseCollectionData`, `generateBaseDeliveryData`, `generateBaseReceiptData`, `generateBaseReceiptWithoutDeliveryIdData`. Use `beta1.unknownResourceId` for a well-formed ID that does not exist.
+
+A later step needs the IDs from earlier steps in the same test:
+
+1. Create a movement and read `movementId`
+2. Record a collection against that movement
+3. Record a delivery with those movement IDs and read `deliveryId`
+4. Record a receipt against the delivery, or a receipt without a delivery ID
+
+## Problem responses
+
+Same shape on every collections beta version. Assert the status code first. Assert `response.headers['x-request-id']` with `expect.any(String)`. Then `toEqual()` the problem body:
+
+- `type`: `https://defra.github.io/digital-waste-tracking-api-site/preview/problems/` plus `bad-request` or `not-found`
+- `title`, `detail`, `instance`
+- `requestId`: `response.headers['x-request-id']`
+
+Receipt validation errors (`key`, `errorType`, `message`) do not apply to these endpoints.
+
+Beta-2 create-movement rejections leave `detail` and `errors` unchecked until DWTC-221.

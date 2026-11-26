@@ -1,0 +1,36 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-fe-uat. Proxy mode, clean browsers, timeouts, and
+  failure reporting.
+globs:
+  - 'repos/digital-waste-tracking-fe-uat/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-fe-uat. Proxy mode, clean browsers, timeouts, and
+    failure reporting.
+---
+# Proxy, sessions, and reports
+
+`HTTP_PROXY` is the Node proxy URL. `PROXY_MODE` is `off`, `cdp`, or `zap`. Any other set value throws. Unset means `cdp` when `HTTP_PROXY` is set, and `off` when it is not. CDP sets `HTTP_PROXY` and does not set `PROXY_MODE`. `off` ignores `HTTP_PROXY`. `ZAP_API_KEY` authenticates the ZAP API when the daemon requires a key. Do not bring back `ZAP_PROXY_URL` or `ZAP_PROXY_API_URL`.
+
+`zap` uses `HTTP_PROXY` for service API clients and as the `ProxyAgent` for ZapApi. WebdriverIO also sends its own hub requests (Node → grid) through `HTTP_PROXY`, so `GRID_HOST` must be a hostname ZAP can resolve on the compose network (e.g. `selenium-chrome`), not `127.0.0.1`. `TestConfig.zapBaseUrl` from the `.zap` support file is the compose hostname for ZAP (e.g. `http://zap:8080`): ZapApi uses it as its base URL (requests go through `HTTP_PROXY`), and Chrome uses it as the browser proxy. CDP always gives Chrome `HTTP_PROXY` (platform egress / squid) and never reads `zapBaseUrl`.
+
+Local grid + compose ZAP with a host-network runner typically sets `HTTP_PROXY=http://127.0.0.1:8080` and `GRID_HOST=selenium-chrome`. `local.zap.config.json` holds service URLs and `zapBaseUrl` as compose hostnames.
+
+A local or CI scan sets `HTTP_PROXY`, `PROXY_MODE=zap`, and optionally `ZAP_API_KEY`. The grid and local Chrome `onPrepare` open a ZAP session. Those browsers send page traffic through the proxy. API calls to the services under test go through it too. `onComplete` writes `zap-report/`. `npm run test:zap` runs `AnalyseZapReport.feature` on the grid with `CUCUMBER_EXTRA_TAGS='@zap'` and attaches those saved files to Allure. It does not set `ENVIRONMENT`.
+
+`cdp` has no ZAP. Traffic that leaves the platform uses the proxy: Cognito, GOV.UK Pay, and the browser started by the grid or local Chrome. Calls to services inside CDP stay direct.
+
+BrowserStack's remote browser is not given `HTTP_PROXY`. The runner uses it to reach BrowserStack: `bootstrap()` for the Node client, and BrowserStack Local's host and port from that URL. Call `bootstrap()` only inside the `HTTP_PROXY` check, and only when the mode is not `off`. Do not import `undici` from a WebdriverIO config or call `setGlobalDispatcher`. Leave `@wdio/*` on 9.33.1 and `undici` on 7.30.1. Do not change the Portal Chrome image, `compose.yml` image pins, or the Dockerfile `node:22.23.4-slim` image.
+
+`connectionRetryTimeout` stays 120000 on the grid and BrowserStack, and 60000 on local Chrome. `connectionRetryCount` stays 3. Do not raise it to wait longer for session creation. The grid is also CDP and GitHub, so it keeps the longer timeout. Cucumber step timeout is 120000 on the grid and local Chrome, and 180000 on BrowserStack. Those values live in `test/setup/wdio-shared.js` `timeouts`.
+
+Page waits omit an explicit timeout so WebdriverIO uses the active runner's `waitforTimeout`. Do not import `config` from a WebdriverIO file for `waitforTimeout`. Frontend `baseUrl` on a page object is `browser.options.baseUrl` from the active runner.
+
+`MAX_INSTANCES` sets runner and per-capability `maxInstances`, default 1. Each worker has its own browser. Skip `reloadSession()` only on the first scenario of a worker. Later scenarios reload. Do not add a cookie clear, a session-list cleaner, or a custom Cucumber retry.
+
+Screenshot a failed step or scenario only. The Allure report is always generated and published after the run. Keep the `FAILED` file and `entrypoint.sh`.

@@ -733,3 +733,13 @@ Lewis Magri, 2026-11-26 15:21 UTC
 The hooks and `install-hooks` call `bin/rulesync/rulesync --command=generate --delete`.
 
 Covers: `bin/rulesync/rulesync`, `bin/rulesync/hooks/`, `bin/rulesync/install-hooks`, `.rulesync/rules/rulesync.md`, `.rulesync/rules/skill-scripts.md`, `.rulesync/skills/rulesync/SKILL.md`, `README.md`.
+
+## 85. Repository rules and skills apply only in that repository
+
+Lewis Magri, 2026-11-26 16:35 UTC
+
+Rules and skills copied from a repository live in `.rulesync/rules/<name>/` and `.rulesync/skills/<name>/`. A rule's globs are `repos/<name>/...`. A skill's `cursor.paths` and `claudecode.paths` are `repos/<name>/**`. They apply only while the work is in that repository.
+
+The copies are from `digital-waste-tracking-fe-uat`, `digital-waste-tracking-perf-test`, `digital-waste-tracking-uat`, and `digital-waste-tracking-docs`. Planning or writing API tests from a ticket uses create-uat-tests-from-jira in the uat folder.
+
+Covers: `.rulesync/rules/writing-rules.md`, `.rulesync/rules/atlassian-skills.md`, `.rulesync/skills/README.md`.

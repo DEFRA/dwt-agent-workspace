@@ -1,0 +1,75 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-perf-test. CDP Platform Integration Rules
+globs:
+  - 'repos/digital-waste-tracking-perf-test/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-perf-test. CDP Platform Integration Rules
+---
+# CDP Platform Integration Rules
+
+## CDP-Specific Considerations
+- This repository is designed for CDP Platform execution
+- Tests run as Docker containers in ECS tasks
+- Results are published to CDP Portal
+- Platform handles infrastructure provisioning automatically
+
+## Environment Configuration
+- Use `${__P(environment)}` for environment-specific URLs
+- Support multiple environments: dev, test, perf-test, prod
+- Configure base URLs for different environments
+- Use CDP-specific environment variables
+
+## Docker Integration
+- Tests run in Docker containers
+- Include proper Dockerfile and entrypoint.sh
+- Ensure payload files are accessible in container
+- Configure proper working directory in container
+
+## Result Reporting
+- Results are written into a single consolidated JMeter JTL file (`results/results.jtl`)
+- An HTML report is generated into the `reports/` directory
+- In CI mode (`CI=true`), `entrypoint.sh` uploads:
+  - The combined JTL file
+  - The JMeter log files
+  - The entire HTML report directory
+  to the S3 location configured by `RESULTS_OUTPUT_S3_PATH` (using the `S3_ENDPOINT` endpoint)
+- These uploaded artifacts are used by the CDP Platform to display performance results in the portal
+
+## Local Testing
+- Support LocalStack for local development
+- Include local testing instructions
+- Provide Docker commands for local execution
+- Support both local and CDP execution modes
+
+## Platform Limitations
+
+### Maximum Runtime Limit
+- **CDP Platform has a 2-hour maximum runtime limit**
+- Test processes will be automatically killed if they exceed this limit
+- **Note**: Complete test suite can now be executed within the 2-hour limit
+- **Test Pack Duration**: Current test pack duration is ~58 minutes
+
+### Soak Testing Limitation
+- Due to the 2-hour runtime limit, soak testing cannot be performed in the CDP CI environment
+- Soak testing (long-duration tests to identify memory leaks, resource exhaustion, or performance degradation over time) is not supported
+- Use local environments for long-duration tests if needed
+
+### Test Execution Strategy
+- **Individual Tests**: Run single test scenarios rather than complete test suite
+- **Test Selection**: Choose specific JMX files based on testing objectives
+- **Duration Management**: Ensure individual test durations don't exceed 2 hours
+- **CI Mode**: Set `CI=true` in environment variables for CDP Platform execution
+
+## Best Practices
+- Don't test CDP platform performance (handled by platform)
+- Focus on service performance, not infrastructure
+- Use CDP-provided monitoring and logging
+- Follow CDP best practices for test execution
+- Monitor test duration to stay within limits
+- Use appropriate test intensity levels for CDP environment

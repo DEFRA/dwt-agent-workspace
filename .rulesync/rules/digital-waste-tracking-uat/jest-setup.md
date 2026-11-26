@@ -1,0 +1,46 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. Jest setup and configuration patterns
+globs:
+  - 'repos/digital-waste-tracking-uat/**/test/support/jest/*.js'
+  - 'repos/digital-waste-tracking-uat/**/*.test.js'
+  - 'repos/digital-waste-tracking-uat/**/specs/**/*.js'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. Jest setup and configuration patterns
+---
+# Jest Setup Patterns
+
+## Process boundaries
+
+Jest uses two `globalThis` scopes:
+
+- **Parent process**: `global-setup.js` and `global-teardown.js` share one `globalThis`. Teardown reuses `globalThis.testConfig` and `globalThis.apis` from setup. Leave those clients open in setup; teardown always closes them after any ZAP report writes.
+- **Each test worker**: `setup.js` and that worker's tests share a different `globalThis`. Workers cannot read the parent's `globalThis`.
+
+Share run-scoped values with workers through `process.env` (workers inherit it). `global-setup.js` sets `API_CODE` and `ORGANISATION_ID`. Tests read them through `globalThis.testConfig` getters. `globalSetup` always runs; do not gate it with an environment flag.
+
+## Configuration and API clients
+
+Assign `globalThis.testConfig` and create `globalThis.apis` inside the process that uses them:
+
+- Parent: at the start of `globalSetup`.
+- Workers: assign `globalThis.testConfig` in `beforeAll` in `setup.js`. Create `globalThis.apis` in `beforeEach` and close it in `afterEach`.
+
+Create a new API client set for each test so request state, including the bearer token, does not carry over. API classes read `globalThis.testConfig`. Do not import `testConfig` from `test/apis/`.
+
+`globalThis.testConfig` is assigned in `beforeAll`, after test files are parsed. Do not branch `describe` or `it` on it at module scope. Skip auth-dependent behaviour at runtime inside helpers such as `authenticateAndSetToken()`.
+
+## Organisation and API code
+
+When `API_CODE` or `ORGANISATION_ID` is unset, `global-setup.js` creates an organisation, reads its API code, and stores both on `process.env`. Production must already have both set; setup throws if either is missing. Tests use `globalThis.testConfig.apiCode` and `globalThis.testConfig.organisationId`.
+
+## API rate limits and test concurrency
+
+- `maxWorkers` is `testConfig.maxWorkers`. `MAX_WORKERS` sets it. A missing or non-numeric value uses 3. Four workers continued to cause HTTP 429s. Check request rates before increasing concurrency.
+- Private APIs in `dev` and `test` default to 25 requests/second with a burst limit of 25. See [CDP throttling limits](https://portal.cdp-int.defra.cloud/documentation/faq/api-gateway.md#what-are-the-default-api-throttling-limits).
+- Worker limits do not enforce request rates. Avoid overlapping runs; use `--runInBand` if 429s persist. Keep the README guidance aligned.

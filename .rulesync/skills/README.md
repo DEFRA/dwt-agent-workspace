@@ -19,7 +19,14 @@ This directory is the source. `rulesync generate` writes each skill, including `
 | [get-defra-team-repos](get-defra-team-repos/SKILL.md)   | `/get-defra-team-repos`                    | Save the user's DEFRA team repositories under `.tmp` |
 | [seed-repos](seed-repos/SKILL.md)                       | `/seed-repos`                              | Clone the saved DEFRA team repositories into `repos/` |
 
-Planning or writing API tests from a ticket stays in `digital-waste-tracking-uat`.
+Planning or writing API tests from a ticket uses [create-uat-tests-from-jira](digital-waste-tracking-uat/create-uat-tests-from-jira/SKILL.md). That skill applies only while the work is in `repos/digital-waste-tracking-uat/`.
+
+Repository skills live in a folder named after the repository. They apply only while the work is in `repos/<name>/`.
+
+| Folder | Applies to | What it holds |
+| --- | --- | --- |
+| [digital-waste-tracking-uat](digital-waste-tracking-uat/SKILL.md) | `repos/digital-waste-tracking-uat/` | UAT tests from a Jira ticket, and that repository's Jira, Confluence, and release-note skills |
+| [digital-waste-tracking-docs](digital-waste-tracking-docs/SKILL.md) | `repos/digital-waste-tracking-docs/` | Assurance ADR review, and the architecture drift audit |
 
 **Read skills** fetch data to `.tmp/` and return full contents — do not guess from memory.
 

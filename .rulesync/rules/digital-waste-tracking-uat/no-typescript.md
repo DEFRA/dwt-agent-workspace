@@ -1,0 +1,22 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. TypeScript usage restrictions
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/*.mjs'
+  - 'repos/digital-waste-tracking-uat/**/*.json'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. TypeScript usage restrictions
+---
+# No TypeScript Rule
+
+- **No TypeScript Files**: Do not create `.ts` or `.tsx` files in this project
+- **No TypeScript Syntax**: Do not use TypeScript syntax in JavaScript files (type annotations, interfaces, etc.)
+- **JavaScript Only**: This project uses pure JavaScript with ES modules
+- **No Type Definitions**: Do not add `.d.ts` files or TypeScript type definitions
+- **JSDoc Instead**: Use JSDoc comments for type documentation instead of TypeScript

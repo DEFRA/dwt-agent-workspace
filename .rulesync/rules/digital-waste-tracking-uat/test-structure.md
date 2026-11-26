@@ -1,0 +1,30 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. Test code structure and describe-it nesting
+  rules
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.test.js'
+  - 'repos/digital-waste-tracking-uat/**/test/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/specs/**/*.js'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. Test code structure and describe-it nesting
+    rules
+---
+# Test Code Structure
+
+## Describe-It Nesting
+
+- **Maximum 3 Levels**: Use exactly 3 levels of nesting maximum within code (describe-describe-it hierarchy)
+- **Note**: This is separate from the 4-level organizational structure (API/Feature/Behavior/Expectation) which spans folders and files
+- **Pattern**: Outer describe (behavior) → Inner describe (sub-behavior) → it (expectation)
+
+## Style Guidelines
+
+- **Match Existing Style**: Follow the style conventions used elsewhere in the repository
+- **Descriptive Names**: Use clear, descriptive test names that explain the expected behavior
+- **Clear Intent**: Test structure should make test intent immediately obvious

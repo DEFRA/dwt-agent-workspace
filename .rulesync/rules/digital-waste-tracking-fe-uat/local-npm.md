@@ -1,0 +1,34 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-fe-uat. This machine has no host npm. Run npm
+  inside the project image.
+globs:
+  - 'repos/digital-waste-tracking-fe-uat/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-fe-uat. This machine has no host npm. Run npm
+    inside the project image.
+---
+# Running npm on this machine
+
+This checkout has no host `npm`. Do not add an npm script or a README step for this. Do not print or commit `env.sh`.
+
+## Host network (`dwtnpm`)
+
+For ZAP with compose selenium, set `HTTP_PROXY=http://127.0.0.1:8080` and `GRID_HOST=selenium-chrome` in `env.sh`. WDIO sends hub traffic through `HTTP_PROXY`, so the grid hostname must be one ZAP can resolve. Chrome and ZapApi use `zapBaseUrl` from `local.zap.config.json`.
+
+Interactive:
+
+```bash
+alias dwtnpm='docker run --rm -it --network host -v "$PWD:$PWD" -w "$PWD" --entrypoint "" "$(docker build -q .)" npm'
+```
+
+Non-interactive shells omit `-it`:
+
+```bash
+docker run --rm --network host -v "$PWD:$PWD" -w "$PWD" --entrypoint "" "$(docker build -q .)" npm <args>
+```

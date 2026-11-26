@@ -1,0 +1,32 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. File naming and organization rules
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.test.js'
+  - 'repos/digital-waste-tracking-uat/**/test/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/specs/**/*.js'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. File naming and organization rules
+---
+# File Naming & Organization
+
+## File Naming Conventions
+
+- **Consistent Naming**: Use kebab-case for all test files (e.g., `create-waste-movement.test.js`, `organisation-api-id.test.js`)
+- **No CamelCase**: Avoid camelCase in test file names (e.g., `organisationApiId.test.js` should be `organisation-api-id.test.js`)
+- **Descriptive Names**: Test file names should clearly indicate the feature being tested
+
+## Directory Structure
+
+- **Test Location**: Place tests in `test/specs/` directory organized by feature
+- **Test Files**: Use `.test.js` extension for test files
+- **Support Files**: Keep test utilities in `test/support/` directory
+- **Group by Feature**: Organize tests by business domain, not technical implementation
+- **API versions**: Place collections beta tests in `test/specs/WasteMovementExternalAPI/phase-2/beta-<n>/` (`beta-1`, `beta-2`, `beta-3`, ...). See `collections-beta.mdc`
+- **Phases**: Receipt of Waste tests live under `phase-1/` (`CreateWasteMovement/`, `ReferenceData/`, `UpdateWasteMovement/`, `ProductionApprovalTests/`). National Waste Movements tests live under `phase-2/`. Tests that compare the two live under `phase-parity/`.
+- **Test Categories**: Use consistent describe block naming for test organization

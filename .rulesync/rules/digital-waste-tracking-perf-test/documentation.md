@@ -1,0 +1,43 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-perf-test. Documentation Standards
+globs:
+  - 'repos/digital-waste-tracking-perf-test/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-perf-test. Documentation Standards
+---
+# Documentation Standards
+
+## Required Documentation
+- `README.md` - Repository overview, setup instructions, test execution, and high-level test organization
+- `.cursor/rules/` - LLM interaction rules and implementation guidelines
+
+## Documentation Updates
+- Update documentation when adding new tests
+- Keep documentation in sync with actual test structure
+- Include clear examples and usage instructions
+- Document any changes to test organization or payload structure
+
+## Code Comments
+- Include meaningful comments in JMX files
+- Document test purpose and configuration
+- Explain any complex test logic or setup
+- Use clear, descriptive test names and descriptions
+
+## File Naming
+- Use descriptive names for all files
+- Follow consistent naming conventions
+- Use kebab-case for file names
+- Include version or date when appropriate
+
+## README Content
+- Repository purpose and scope
+- Setup and installation instructions
+- Running tests locally and in CDP
+- Test organization overview
+- Contributing guidelines

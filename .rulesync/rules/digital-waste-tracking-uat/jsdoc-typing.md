@@ -1,0 +1,23 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. JSDoc typing documentation standards
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/*.mjs'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. JSDoc typing documentation standards
+---
+# JSDoc Typing Documentation
+
+- **JSDoc Comments**: Use JSDoc comments for function and method documentation
+- **Parameter Types**: Document parameter types using `@param {type} name - description`
+- **Return Types**: Document return types using `@returns {type} description`
+- **Type Annotations**: Use JSDoc type annotations like `{string}`, `{Object}`, `{Promise<JsonResponse>}`
+- **Optional Parameters**: Mark optional parameters with square brackets `[paramName]`
+- **Complex Types**: Use JSDoc typedef for complex object types
+- **Example Format**: Follow the pattern `@param {string} endpoint - API endpoint`

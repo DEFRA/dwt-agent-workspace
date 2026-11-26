@@ -1,0 +1,29 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. API usage and configuration access rules
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.test.js'
+  - 'repos/digital-waste-tracking-uat/**/test/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/specs/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/apis/**/*.js'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. API usage and configuration access rules
+---
+# API Usage & Configuration
+
+- **API Instance Usage**: Always use `globalThis.apis` for API calls
+- **Configuration Access**: Read configuration from `globalThis.testConfig`, including `apiCode` and `organisationId`
+- **API Modules**: Classes under `test/apis/` use `globalThis.testConfig`. Do not import `testConfig` there
+- **No Hardcoded Credentials**: Never hardcode authentication credentials in test files
+- **Consistent Auth Setup**: Always use `authenticateAndSetToken()` helper in `beforeEach`
+
+## Authentication & Test Skipping
+
+- **Local Development**: Use `AUTH_DISABLED=true` to disable authentication for local/mock API testing
+- **Auth Helper Pattern**: The `authenticateAndSetToken()` helper skips authentication when `AUTH_DISABLED=true`
+- **Runtime Checks**: `globalThis.testConfig` is assigned in `beforeAll`, so check it inside hooks and helpers, not at module scope
