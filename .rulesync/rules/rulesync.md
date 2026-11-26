@@ -3,20 +3,26 @@ root: true
 targets:
   - '*'
 description: >-
-  Shared rules and skills are written in .rulesync. RULESYNC_TOOL in .env
-  selects cursor or claude. Hooks load that tool and import its edits.
+  Shared rules and skills are written in .rulesync. An agent does not read or
+  write .rulesync unless it is actively debugging or upgrading rulesync with the
+  user. RULESYNC_TOOL in .env selects cursor or claude. Hooks load that tool and
+  import its edits.
 globs:
   - '**/*'
 cursor:
   alwaysApply: true
   description: >-
-    Shared rules and skills are written in .rulesync. RULESYNC_TOOL in .env
-    selects cursor or claude. Hooks load that tool and import its edits.
+    Shared rules and skills are written in .rulesync. An agent does not read or
+    write .rulesync unless it is actively debugging or upgrading rulesync with
+    the user. RULESYNC_TOOL in .env selects cursor or claude. Hooks load that
+    tool and import its edits.
   globs: []
 ---
 # Rulesync
 
-`.rulesync/rules/` is the source for shared rules. `.rulesync/skills/` is the source for skills. Edit a rule or a skill there.
+`.rulesync/rules/` is the source for shared rules. `.rulesync/skills/` is the source for skills.
+
+An agent does not read or write `.rulesync` unless it is actively debugging or upgrading rulesync with the user. Edit the generated rule or skill for the tool in use. A commit writes that edit back into `.rulesync`.
 
 Cursor files in `.cursor/` and Claude Code files in `.claude/` and `CLAUDE.md` are generated from that source. A source rule with `root: true` is written to `CLAUDE.md`. `.gitignore` ignores `.cursor/`, `.claude/`, `CLAUDE.md`, and `AGENTS.md`.
 

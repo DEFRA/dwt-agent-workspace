@@ -623,3 +623,13 @@ Lewis Magri, 2026-11-26 12:32 UTC
 The hooks live in `bin/rulesync/hooks/`. `.git/hooks` is not in the repository. `bin/rulesync/install-hooks` sets `core.hooksPath` to `bin/rulesync/hooks` and loads the tool files. The copies under `.git/hooks` are removed.
 
 Covers: `bin/rulesync/hooks/`, `bin/rulesync/install-hooks`, `.rulesync/rules/rulesync.md`, `.rulesync/skills/rulesync/SKILL.md`.
+
+## 74. Agents leave .rulesync alone
+
+Lewis Magri, 2026-11-26 13:16 UTC
+
+An agent does not read or write `.rulesync` unless it is actively debugging or upgrading rulesync with the user. It edits the generated Cursor or Claude file. A commit still writes that edit back into `.rulesync`.
+
+`.cursor/rules/writing-rules.mdc` no longer tells an agent to edit `.rulesync/rules/`. It points at the rulesync rule.
+
+Covers: `.cursor/rules/rulesync.mdc`, `.cursor/rules/writing-rules.mdc`.
