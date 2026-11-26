@@ -10,12 +10,14 @@ description: >-
 
 Run `gh` through the `dwt-gh` image, built from the official `cli/cli` release binary. GitHub does not publish a CLI image. `ghcr.io/cli/cli` is denied.
 
+The image is `Dockerfile` in this skill. `GH_VERSION` is the GitHub CLI release it installs.
+
 ## Image
 
-When `docker image inspect dwt-gh` fails, build it from the workspace root:
+From the workspace root:
 
 ```bash
-bash .cursor/skills/github-cli-via-docker/scripts/build-image.sh
+docker build -t dwt-gh .cursor/skills/github-cli-via-docker
 ```
 
 ## Login
@@ -35,19 +37,20 @@ Do not print the token. Do not read `~/.config/gh/hosts.yml` into the chat.
 
 ## Commands
 
-Drop `-it` for a non-interactive command.
+`bin/gh` is the `gh` command when the host has no `gh`. It runs the image without a terminal. Put that `bin` directory first on `PATH`, then call `gh`:
 
 ```bash
-docker run --rm \
-  -v "$HOME/.config/gh:/root/.config/gh" \
-  dwt-gh <args>
+PATH="$PWD/.cursor/skills/github-cli-via-docker/bin:$PATH" gh <args>
 ```
+
+A shell alias is not visible inside a script. A script calls `gh`.
+
+Login still uses `docker run -it` above. `bin/gh` does not allocate a terminal.
 
 Repositories a team can access. The value after the name is the team's permission. The organisation owns the repository.
 
 ```bash
-docker run --rm \
-  -v "$HOME/.config/gh:/root/.config/gh" \
-  dwt-gh api --paginate "orgs/DEFRA/teams/<team_slug>/repos" \
+PATH="$PWD/.cursor/skills/github-cli-via-docker/bin:$PATH" \
+  gh api --paginate "orgs/DEFRA/teams/<team_slug>/repos" \
   --jq '.[] | [.full_name, .role_name] | @tsv'
 ```

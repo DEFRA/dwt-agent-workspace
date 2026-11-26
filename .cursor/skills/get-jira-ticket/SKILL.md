@@ -18,13 +18,13 @@ Fetches a single issue and related context to `.tmp/jira-tickets/<ticket>/`. Use
    ```bash
    mkdir -p .tmp/jira-tickets/<ticket>/attachments
 
-   bash .cursor/skills/get-jira-ticket/scripts/ticket.sh <ticket> full > .tmp/jira-tickets/<ticket>/ticket.txt
-   bash .cursor/skills/get-jira-ticket/scripts/ticket.sh <ticket> json > .tmp/jira-tickets/<ticket>/ticket.json
-   bash .cursor/skills/get-jira-ticket/scripts/comments.sh <ticket> list > .tmp/jira-tickets/<ticket>/comments.txt
-   bash .cursor/skills/get-jira-ticket/scripts/comments.sh <ticket> json > .tmp/jira-tickets/<ticket>/comments.json
-   bash .cursor/skills/get-jira-ticket/scripts/attachments.sh <ticket> .tmp/jira-tickets/<ticket>/attachments
-   bash .cursor/skills/get-jira-ticket/scripts/github-dev.sh <ticket> .tmp/jira-tickets/<ticket>
-   bash .cursor/skills/get-jira-ticket/scripts/related-tickets.sh <ticket> .tmp/jira-tickets/<ticket>
+   node .cursor/skills/get-jira-ticket/scripts/ticket.js <ticket> full > .tmp/jira-tickets/<ticket>/ticket.txt
+   node .cursor/skills/get-jira-ticket/scripts/ticket.js <ticket> json > .tmp/jira-tickets/<ticket>/ticket.json
+   node .cursor/skills/get-jira-ticket/scripts/comments.js <ticket> list > .tmp/jira-tickets/<ticket>/comments.txt
+   node .cursor/skills/get-jira-ticket/scripts/comments.js <ticket> json > .tmp/jira-tickets/<ticket>/comments.json
+   node .cursor/skills/get-jira-ticket/scripts/attachments.js <ticket> .tmp/jira-tickets/<ticket>/attachments
+   node .cursor/skills/get-jira-ticket/scripts/github-dev.js <ticket> .tmp/jira-tickets/<ticket>
+   node .cursor/skills/get-jira-ticket/scripts/related-tickets.js <ticket> .tmp/jira-tickets/<ticket>
    ```
 
    Reads `ATLASSIAN_USER` and `ATLASSIAN_TOKEN` from the workspace `.env`.
@@ -43,7 +43,7 @@ Fetches a single issue and related context to `.tmp/jira-tickets/<ticket>/`. Use
 
 2. **If any script fails, stop immediately.** Report the exact error to the user and ask them to fix credentials before retrying. Do not guess ticket contents from memory or scrape the Jira UI.
 
-   Note: `github-dev.sh` may return empty PR/commit sections if nothing is linked in Jira's development panel — that is not an error.
+   Note: `github-dev.js` may return empty PR/commit sections if nothing is linked in Jira's development panel — that is not an error.
 
 3. **Read every file** under `.tmp/jira-tickets/<ticket>/` — especially `comments.txt`, `github.txt`, `related/`, `epic/`, and `attachments/`. Acceptance criteria, PR changes, and scope often live in comments, GitHub links, the epic, or linked tickets.
 
@@ -53,12 +53,12 @@ Fetches a single issue and related context to `.tmp/jira-tickets/<ticket>/`. Use
 
 | Script               | Purpose                                                                          |
 | -------------------- | -------------------------------------------------------------------------------- |
-| `ticket.sh`          | Issue details                                                                    |
-| `comments.sh`        | Issue comments                                                                   |
-| `attachments.sh`     | Download attachment files                                                        |
-| `github-dev.sh`      | GitHub PRs, commits, changed files, and CI builds (Jira dev-status API)          |
-| `related-tickets.sh` | Parent, linked issues, subtasks, and epic context (requires `ticket.json` first) |
-| `epic-issues.sh`     | List all issues in an epic (called by `related-tickets.sh`)                      |
+| `ticket.js`          | Issue details                                                                    |
+| `comments.js`        | Issue comments                                                                   |
+| `attachments.js`     | Download attachment files                                                        |
+| `github-dev.js`      | GitHub PRs, commits, changed files, and CI builds (Jira dev-status API)          |
+| `related-tickets.js` | Parent, linked issues, subtasks, and epic context (requires `ticket.json` first) |
+| `epic-issues.js`     | List all issues in an epic (called by `related-tickets.js`)                      |
 
 Set `JIRA_MAX_RELATED=20` to fetch more than the default 10 related tickets.
 
@@ -73,6 +73,5 @@ Set `JIRA_MAX_RELATED=20` to fetch more than the default 10 related tickets.
 
 - [get-pr-service-version](../get-pr-service-version/SKILL.md) — minted versions for linked service PRs
 - [get-jira-release](../get-jira-release/SKILL.md) — release containing this ticket
-- [create-uat-tests-from-jira](../create-uat-tests-from-jira/SKILL.md) — tests from ticket data
 - [create-jira-release](../create-jira-release/SKILL.md) — create the release that contains this ticket
 - [edit-jira-release](../edit-jira-release/SKILL.md) — change that release or its Release Notes section

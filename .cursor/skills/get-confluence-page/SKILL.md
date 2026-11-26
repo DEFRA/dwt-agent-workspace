@@ -37,7 +37,7 @@ Otherwise                   → Page workflow (step 3)
 ```bash
 mkdir -p .tmp/confluence-folders/<folder-id>
 
-bash .cursor/skills/get-confluence-page/scripts/folder-contents.sh \
+node .cursor/skills/get-confluence-page/scripts/folder-contents.js \
   <folder_id_or_url> \
   .tmp/confluence-folders/<folder-id>
 ```
@@ -60,7 +60,7 @@ Only when the user gives a search term, not a URL or ID:
 ```bash
 mkdir -p .tmp/confluence-searches
 
-bash .cursor/skills/get-confluence-page/scripts/search.sh "<query>" [space_key] \
+node .cursor/skills/get-confluence-page/scripts/search.js "<query>" [space_key] \
   > ".tmp/confluence-searches/<query-slug>.txt"
 ```
 
@@ -75,9 +75,9 @@ For a single page URL or ID:
 ```bash
 mkdir -p .tmp/confluence-pages/<page-id>
 
-bash .cursor/skills/get-confluence-page/scripts/page.sh <page_id_or_url> full > .tmp/confluence-pages/<page-id>/page.txt
-bash .cursor/skills/get-confluence-page/scripts/page.sh <page_id_or_url> json > .tmp/confluence-pages/<page-id>/page.json
-bash .cursor/skills/get-confluence-page/scripts/child-pages.sh <page-id> .tmp/confluence-pages/<page-id>
+node .cursor/skills/get-confluence-page/scripts/page.js <page_id_or_url> full > .tmp/confluence-pages/<page-id>/page.txt
+node .cursor/skills/get-confluence-page/scripts/page.js <page_id_or_url> json > .tmp/confluence-pages/<page-id>/page.json
+node .cursor/skills/get-confluence-page/scripts/child-pages.js <page-id> .tmp/confluence-pages/<page-id>
 ```
 
 Output: `.tmp/confluence-pages/<page-id>/`
@@ -110,11 +110,11 @@ After a successful fetch:
 
 | Script                  | Purpose                                       |
 | ----------------------- | --------------------------------------------- |
-| `page.sh`               | Fetch one page by ID or URL                   |
-| `folder-contents.sh`    | Fetch folder metadata and all pages inside it |
-| `search.sh`             | Find pages by title/body text                 |
-| `child-pages.sh`        | Fetch child pages under a page                |
-| `resolve-content-id.sh` | Parse numeric ID from page or folder URL      |
+| `page.js`               | Fetch one page by ID or URL                   |
+| `folder-contents.js`    | Fetch folder metadata and all pages inside it |
+| `search.js`             | Find pages by title/body text                 |
+| `child-pages.js`        | Fetch child pages under a page                |
+| `resolve-content-id.js` | Parse numeric ID from page or folder URL      |
 
 ## Examples
 

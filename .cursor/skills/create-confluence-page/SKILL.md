@@ -22,10 +22,10 @@ If the parent is not provided, ask the user. Optionally verify it exists:
 
 ```bash
 # Page parent
-bash .cursor/skills/get-confluence-page/scripts/page.sh <parent_id_or_url> summary
+node .cursor/skills/get-confluence-page/scripts/page.js <parent_id_or_url> summary
 
 # Folder parent
-bash .cursor/skills/get-confluence-page/scripts/folder-contents.sh <folder_id_or_url> .tmp/confluence-folders/<folder-id>
+node .cursor/skills/get-confluence-page/scripts/folder-contents.js <folder_id_or_url> .tmp/confluence-folders/<folder-id>
 ```
 
 The new page inherits the parent's space. Pages can be created under a **page or folder** parent.
@@ -53,7 +53,7 @@ Show the draft to the user and **ask for confirmation before publishing**.
 **Create** a new child page:
 
 ```bash
-bash .cursor/skills/create-confluence-page/scripts/create-page.sh \
+node .cursor/skills/create-confluence-page/scripts/create-page.js \
   <parent_id_or_url> \
   "<title>" \
   .tmp/confluence-drafts/<slug>/page.html
@@ -62,7 +62,7 @@ bash .cursor/skills/create-confluence-page/scripts/create-page.sh \
 **Update** an existing page:
 
 ```bash
-bash .cursor/skills/create-confluence-page/scripts/update-page.sh \
+node .cursor/skills/create-confluence-page/scripts/update-page.js \
   <page_id_or_url> \
   .tmp/confluence-drafts/<slug>/page.html \
   "<new_title>"
@@ -85,9 +85,9 @@ Return the page ID and URL from the script output. Save them to `.tmp/confluence
 
 | Script               | Purpose                                        |
 | -------------------- | ---------------------------------------------- |
-| `create-page.sh`     | Create a page under a parent                   |
-| `update-page.sh`     | Update an existing page (increments version)   |
-| `resolve-page-id.sh` | Parse page ID from ID or URL (used internally) |
+| `create-page.js`     | Create a page under a parent                   |
+| `update-page.js`     | Update an existing page (increments version)   |
+| `resolve-page-id.js` | Parse page ID from ID or URL (used internally) |
 
 ## Example storage-format body
 

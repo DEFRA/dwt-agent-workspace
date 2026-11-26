@@ -9,7 +9,7 @@ Changes an existing Jira fix version. It does not create one. Use [create-jira-r
 
 Fetch the release with [get-jira-release](../get-jira-release/SKILL.md) immediately before editing, including when it was fetched earlier in the session. Read `release.txt`, `stages.txt`, `issues.txt`, `related-work.txt`, and `sections.txt` from that fetch, and draft the edit from those files. Change only the parts the user asked to change. Leave the description, Release Notes section, stages, date, and tickets alone when they were not part of the request.
 
-NWM, SPI, and WOE are the projects in the Jira project names rule. The note shape is the Jira release description rule.
+NWM, SPI, and WOE are the projects in the Jira project names rule. That rule says which project key to pass. There is no default. The note shape is the Jira release description rule.
 
 ## What you can change
 
@@ -115,7 +115,7 @@ A merge to `main` mints a new version for that repo. Each service and each test 
 **Ask for user confirmation before writing to Jira** unless the caller skill already obtained it.
 
 ```bash
-bash .cursor/skills/edit-jira-release/scripts/edit-release.sh \
+node .cursor/skills/edit-jira-release/scripts/edit-release.js \
   .tmp/jira-releases/48175 \
   --project DWTC \
   --version 48175 \
@@ -147,7 +147,7 @@ After the release is updated, remind the user to post it in the private Slack ch
 
 | Script | Purpose |
 | --- | --- |
-| `edit-release.sh` | Update the fields passed in. Reuses the create-jira-release writers for the description, stages, tickets, and Release Notes section. |
+| `edit-release.js` | Update the fields passed in. This skill does not create a release. |
 
 ## Examples
 

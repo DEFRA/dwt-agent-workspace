@@ -7,7 +7,7 @@ description: Create a Jira fix version (release) for NWM, SPI, or WOE. Assigns t
 
 Creates a Jira fix version. The release note lives in the **Release Notes** section on that fix version. It does not live in the description, and it is not a Confluence page. To change a release that already exists, use [edit-jira-release](../edit-jira-release/SKILL.md).
 
-NWM, SPI, and WOE are the projects in the Jira project names rule. The note shape is the Jira release description rule.
+NWM, SPI, and WOE are the projects in the Jira project names rule. That rule says which project key to pass. There is no default. The note shape is the Jira release description rule.
 
 ## What goes where
 
@@ -37,7 +37,7 @@ Release stages are the ordered list in the create-release dialog. They are separ
 
 | Parameter | Required | Example |
 | --- | --- | --- |
-| `--project` | No (default `DWTA`) | `DWTC` |
+| `--project` | Yes | `DWTC` |
 | `--release-name` | Yes | `RoW enhancements v1` |
 | `--release-date` | Yes | `2026-11-24` |
 | `--stages` | No | `Planned,Ext-Test,Released` |
@@ -137,7 +137,7 @@ A merge to `main` mints a new version for that repo. Each service and each test 
 ### 3. Check for an existing release (create only)
 
 ```bash
-bash .cursor/skills/create-jira-release/scripts/check-existing-release.sh \
+node .cursor/skills/create-jira-release/scripts/check-existing-release.js \
   DWTC "RoW enhancements v1"
 ```
 
@@ -149,7 +149,7 @@ bash .cursor/skills/create-jira-release/scripts/check-existing-release.sh \
 ```bash
 mkdir -p .tmp/jira-releases/new
 
-bash .cursor/skills/create-jira-release/scripts/create-release.sh \
+node .cursor/skills/create-jira-release/scripts/create-release.js \
   .tmp/jira-releases/new \
   --project DWTC \
   --release-name "RoW enhancements v1" \
@@ -178,13 +178,13 @@ After the release is created, remind the user to post it in the private Slack ch
 
 | Script | Purpose |
 | --- | --- |
-| `create-release.sh` | Create or update the fix version, set stages, assign tickets, write the Release Notes section |
-| `set-release-stages.py` | Set release stages. Planned first, Released last |
-| `write-release-notes.py` | Write markdown into the Release Notes section |
-| `check-existing-release.sh` | Detect a duplicate release name |
-| `assign-issues.sh` | Add the fix version to ticket keys |
-| `format-description.py` | Convert the one-sentence description for the description field |
-| `resolve-project-id.sh` | Resolve a project key to a numeric ID |
+| `create-release.js` | Create the fix version, set stages, assign tickets, write the Release Notes section |
+| `set-release-stages.js` | Set release stages. Planned first, Released last |
+| `write-release-notes.js` | Write markdown into the Release Notes section |
+| `check-existing-release.js` | Detect a duplicate release name |
+| `assign-issues.js` | Add the fix version to ticket keys |
+| `format-description.js` | Convert the one-sentence description for the description field |
+| `resolve-project-id.js` | Resolve a project key to a numeric ID |
 
 ## Examples
 
@@ -194,8 +194,9 @@ After the release is created, remind the user to post it in the private Slack ch
 
 ## Important constraints
 
-- **Release name and date are required for create**
-- **Never create a duplicate release name** — run `check-existing-release.sh` first
+- **This skill creates a release. It does not update one.** `--version` is rejected. A duplicate name is [edit-jira-release](../edit-jira-release/SKILL.md)
+- **Release name and date are required**
+- **Never create a duplicate release name** — run `check-existing-release.js` first
 - **Never write to Jira without user confirmation** (unless a parent skill already confirmed)
 - **The description field is one sentence** — no headings, and no service versions
 - **The note opens with Description as short bullet sentences.** One bullet per change. Do not retell the tickets

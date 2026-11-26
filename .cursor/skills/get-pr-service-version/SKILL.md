@@ -25,7 +25,7 @@ One of:
 2. **Repo + number** — e.g. `waste-movement-backend 113`
 3. **Jira github.txt** — after [get-jira-ticket](../get-jira-ticket/SKILL.md), resolve all PRs in `github.txt`
 
-Optional: `GITHUB_TOKEN` in `.env`, for higher GitHub API rate limits (public repos work without it).
+The script calls `gh`. That login is what can read the DEFRA organisation. The skill scripts rule says how `gh` runs when that command is not installed. There is no GitHub token in `.env`.
 
 ## Steps
 
@@ -84,10 +84,9 @@ Version: 0.107.0
 
 ## Environment
 
-| Variable       | Default | Purpose         |
-| -------------- | ------- | --------------- |
-| `GITHUB_TOKEN` | unset   | Optional. Set in `.env` for higher GitHub API rate limits |
-| `GITHUB_ORG`   | `DEFRA` | Organisation    |
+| Variable     | Default | Purpose                                                      |
+| ------------ | ------- | ------------------------------------------------------------ |
+| `GITHUB_ORG` | `DEFRA` | Organisation when a pull request is given as a repo name only |
 
 ## Examples
 

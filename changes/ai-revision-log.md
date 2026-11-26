@@ -365,3 +365,161 @@ Lewis Magri, 2026-11-25 16:15 UTC
 Unclear "one" and unfinished sentences in the Jira, release notes, and commit rules now name the release, the page, or the message. "Do not create a Confluence release note" and `Already updated. Published early.` stay in the release notes rule. The waste tracking phases rule points there instead of stating those decisions again. Phase 2 external comms is included when the release updates that phase or still needs an update, which is the release notes rule.
 
 Covers: `.cursor/rules/atlassian-skills.mdc`, `.cursor/rules/jira-release-description.mdc`, `.cursor/rules/waste-tracking-phases.mdc`, `.cursor/rules/commit-messages.mdc`.
+
+## 44. One bash loader for .env
+
+Lewis Magri, 2026-11-25 16:25 UTC
+
+Skill scripts source `.cursor/skills/lib/load-env.sh`. `load_env.py` is removed. Python scripts inherit the environment from the shell that sourced that file. A shell that starts Python calls `require_atlassian_env` first.
+
+Covers: `.cursor/skills/lib/load-env.sh`, `.cursor/rules/atlassian-credentials.mdc`, `.cursor/skills/create-jira-release/scripts/write-release-notes.py`, `.cursor/skills/create-jira-release/scripts/set-release-stages.py`, `.cursor/skills/get-jira-release/scripts/release-sections.py`, `.cursor/skills/get-jira-release/scripts/release-stages.py`, `.cursor/skills/get-jira-release/scripts/release-sections.sh`, `.cursor/skills/get-jira-release/scripts/release-stages.sh`.
+
+## 45. load-env.sh sources .env
+
+Lewis Magri, 2026-11-25 16:32 UTC
+
+`.cursor/skills/lib/load-env.sh` sources the workspace `.env`. The directory walk and the line parser are gone. When `.env` exists, its values still replace the environment, including a blank value. When `.env` is missing, the script still uses variables already in the environment, then stops if the Atlassian variables are empty.
+
+Covers: `.cursor/skills/lib/load-env.sh`.
+
+## 46. Skill scripts are vanilla JavaScript
+
+Lewis Magri, 2026-11-25 17:01 UTC
+
+Skill scripts are vanilla ESM JavaScript with JSDoc. Node is 22.23.4, the version `waste-movement-backend` uses. `.cursor/skills/package.json` sets `"type": "module"` and lists no dependencies. Scripts use Node built-ins and run with `node`. `.env` is loaded by `.cursor/skills/lib/env.js`. The shell and Python scripts are removed. The retired Confluence release-note scripts are removed with them. On this machine there is no host `node` or `npm`, and this workspace has no Dockerfile, so those commands use the `node:22.23.4` image. The `dwtnpm` alias is not used here.
+
+Covers: `.cursor/rules/skill-scripts.mdc`, `.cursor/rules/atlassian-credentials.mdc`, `.cursor/rules/atlassian-skills.mdc`, `.cursor/rules/local-machine.mdc`, `.cursor/skills/`.
+
+## 47. This machine does not run npm for skills
+
+Lewis Magri, 2026-11-25 17:04 UTC
+
+`.cursor/rules/local-machine.mdc` no longer tells this machine to run `npm` in the Node image. Skill scripts have no dependencies. The `node:22.23.4` image is only the way to run `node`.
+
+Covers: `.cursor/rules/local-machine.mdc`.
+
+## 48. github-cli-via-docker stays bash
+
+Lewis Magri, 2026-11-25 17:06 UTC
+
+`github-cli-via-docker` is bash. It builds and runs the `dwt-gh` image. `build-image.js` is removed. Run `.cursor/skills/github-cli-via-docker/scripts/build-image.sh` with `bash`. The other skill scripts stay vanilla JavaScript.
+
+Covers: `.cursor/skills/github-cli-via-docker/`, `.cursor/rules/skill-scripts.mdc`, `.cursor/skills/README.md`.
+
+## 49. dwt-gh is a Dockerfile and Compose file
+
+Lewis Magri, 2026-11-25 17:08 UTC
+
+`github-cli-via-docker` no longer has a build script. `Dockerfile` installs GitHub CLI `2.105.0`. `compose.yaml` builds the `dwt-gh` image. Run `docker compose -f .cursor/skills/github-cli-via-docker/compose.yaml build`. `gh` commands stay `docker run` so the shell expands `$HOME` for the config mount.
+
+Covers: `.cursor/skills/github-cli-via-docker/`, `.cursor/rules/skill-scripts.mdc`, `.cursor/skills/README.md`.
+
+## 50. dwt-gh has no Compose file
+
+Lewis Magri, 2026-11-25 17:11 UTC
+
+`github-cli-via-docker` is a Dockerfile only. `compose.yaml` is removed. Build with `docker build -t dwt-gh .cursor/skills/github-cli-via-docker`. `gh` commands stay `docker run`.
+
+Covers: `.cursor/skills/github-cli-via-docker/`, `.cursor/rules/skill-scripts.mdc`.
+
+## 51. Skills may use JavaScript, Bash, or Docker
+
+Lewis Magri, 2026-11-25 17:19 UTC
+
+`.cursor/rules/skill-scripts.mdc` names three approved tools. JavaScript is for complex work and API requests. Bash is for a simple command sequence. A Dockerfile or Compose file runs a program a person may want to leave uninstalled. When that program uses workspace files, mount `$PWD` and set the working directory to `$PWD`.
+
+Covers: `.cursor/rules/skill-scripts.mdc`.
+
+## 52. A missing gh command runs through Docker
+
+Lewis Magri, 2026-11-25 18:23 UTC
+
+A skill calls `gh` by that name. When the command is installed, use it. When it is missing, run `gh` through the github-cli-via-docker skill. On this machine the node image has no `gh` or `docker` command, so the node container mounts the Docker socket and `HOST_HOME` and starts the `dwt-gh` image.
+
+Covers: `.cursor/rules/skill-scripts.mdc`, `.cursor/rules/local-machine.mdc`, `.cursor/skills/lib/gh.js`, `.cursor/skills/seed-repos/`.
+
+## 53. seed-repos is a shell script
+
+Lewis Magri, 2026-11-25 18:35 UTC
+
+`seed-repos` is bash. It calls `gh` for the team repositories, then `git clone` for each repository that is not already under `repos/`. The JavaScript script and `.cursor/skills/lib/gh.js` are removed. On this machine `node` no longer mounts the Docker socket. A missing `gh` still runs through the `dwt-gh` image.
+
+Covers: `.cursor/skills/seed-repos/`, `.cursor/rules/local-machine.mdc`.
+
+## 54. seed-repos clones into the workspace repos directory
+
+Lewis Magri, 2026-11-25 18:37 UTC
+
+`seed-repos.sh` resolves the workspace root four directories above the script. Clones go in `repos/`. A directory that is already there is still skipped.
+
+Covers: `.cursor/skills/seed-repos/scripts/seed-repos.sh`.
+
+## 55. seed-repos finds repos next to .env.example
+
+Lewis Magri, 2026-11-25 18:39 UTC
+
+`seed-repos` walks up from the script until it finds `.env.example`. Clones go in the `repos/` directory next to that file. A directory that is already there is skipped.
+
+Covers: `.cursor/skills/seed-repos/`.
+
+## 56. No default Jira project
+
+Lewis Magri, 2026-11-26 09:25 UTC
+
+A release has no default project. `create-release.js` requires `--project` and no longer falls back to `JIRA_PROJECT_KEY` or `DWTA`. The project key comes from the ticket, the release, or the name the user gave. Ask when none of those is known.
+
+Covers: `.cursor/rules/jira-project-names.mdc`, `.cursor/skills/create-jira-release/`, `.cursor/skills/edit-jira-release/SKILL.md`.
+
+## 57. This workspace does not name create-uat-tests-from-jira
+
+Lewis Magri, 2026-11-26 09:25 UTC
+
+Removed the `create-uat-tests-from-jira` link from `get-jira-ticket` and the skill index. Planning or writing API tests from a ticket stays in `digital-waste-tracking-uat`. This workspace does not name that skill.
+
+Covers: `.cursor/skills/README.md`, `.cursor/skills/get-jira-ticket/SKILL.md`.
+
+## 58. seed-repos uses the workspace root
+
+Lewis Magri, 2026-11-26 09:27 UTC
+
+`seed-repos` does not search for `.env.example`. The script is `.cursor/skills/seed-repos/scripts/seed-repos.sh`. The workspace root is four directories above that file. Clones go in `repos/` there. A directory that is already there is skipped.
+
+Covers: `.cursor/skills/seed-repos/`.
+
+## 59. Create and edit are separate release skills
+
+Lewis Magri, 2026-11-26 09:32 UTC
+
+`create-jira-release` only creates a fix version. It rejects `--version` and no longer sends a PUT. A duplicate name stops and names `edit-jira-release`. `edit-jira-release` is the only skill that changes a release that already exists. It does not create one.
+
+Covers: `.cursor/skills/create-jira-release/`, `.cursor/skills/edit-jira-release/SKILL.md`.
+
+## 60. DEFRA team repositories are fetched, then cloned
+
+Lewis Magri, 2026-11-26 09:40 UTC
+
+`get-defra-team-repos` calls `gh` and saves the logged-in user's DEFRA team repositories to `.tmp/defra-team-repos/`. `seed-repos` reads that list and clones a repository that is not already under `repos/`. The seed script does not call `gh` or Docker.
+
+`github-cli-via-docker/bin/gh` is the `gh` command when the host has no `gh`. Put that `bin` directory on `PATH`. A shell alias is not visible inside a script.
+
+Covers: `.cursor/skills/get-defra-team-repos/`, `.cursor/skills/seed-repos/`, `.cursor/skills/github-cli-via-docker/`, `.cursor/rules/skill-scripts.mdc`, `.cursor/rules/local-machine.mdc`, `.cursor/rules/git-branches.mdc`.
+
+## 61. .env.example lists every variable a skill reads
+
+Lewis Magri, 2026-11-26 09:52 UTC
+
+`.env.example` lists every variable a skill reads, including the ones with a default. A commented line leaves that default in the script.
+
+`create-release.js`, `edit-release.js`, and `link-related-work.js` now load `.env` before reading `JIRA_RELEASE_DESCRIPTION_FORMAT` and `JIRA_RELATED_WORK_CATEGORY`. Those two were read before the file was loaded, so a value in `.env` did not reach the script.
+
+`ATLASSIAN_USER`, `ATLASSIAN_TOKEN`, and `GITHUB_TOKEN` are sent only as an Authorization header. Scripts do not print them and do not write them to `.tmp`.
+
+Covers: `.env.example`, `.cursor/rules/atlassian-credentials.mdc`, `.cursor/skills/create-jira-release/scripts/create-release.js`, `.cursor/skills/create-jira-release/scripts/link-related-work.js`, `.cursor/skills/edit-jira-release/scripts/edit-release.js`.
+
+## 62. No GitHub token in .env
+
+Lewis Magri, 2026-11-26 10:05 UTC
+
+`GITHUB_TOKEN` is removed from `.env.example` and from the credentials rule. A token in `.env` cannot read the DEFRA organisation the way this workspace uses GitHub. `get-pr-service-version` calls `gh`, which uses the logged-in DEFRA session. The JavaScript scripts are replaced by `pr-version.sh` and `pr-versions-from-file.sh`.
+
+Covers: `.env.example`, `.cursor/rules/atlassian-credentials.mdc`, `.cursor/skills/get-pr-service-version/`.

@@ -30,14 +30,14 @@ Jira keeps one rich text section on the release page, separate from the descript
 1. From the repo root, fetch the release. Replace `<version>` with the ID or URL. This runs every read: status, dates, stage, tickets, related work, and the Release Notes section.
 
    ```bash
-   bash .cursor/skills/get-jira-release/scripts/fetch-release.sh \
+   node .cursor/skills/get-jira-release/scripts/fetch-release.js \
      <version> .tmp/jira-releases/<version-id>
    ```
 
    For project key + version name:
 
    ```bash
-   bash .cursor/skills/get-jira-release/scripts/fetch-release.sh \
+   node .cursor/skills/get-jira-release/scripts/fetch-release.js \
      DWTC .tmp/jira-releases/<version-id> "RoW enhancements v1"
    ```
 
@@ -63,13 +63,13 @@ Jira keeps one rich text section on the release page, separate from the descript
 
 | Script                  | Purpose                                          |
 | ----------------------- | ------------------------------------------------ |
-| `fetch-release.sh`      | Run the full get into one output directory           |
-| `resolve-release-id.sh` | Parse version ID from URL, ID, or project + name |
-| `release.sh`            | Status, start date, release date, description (`full`, `summary`, `json`) |
-| `release-stages.sh`     | Stage list and current stage                         |
-| `release-issues.sh`     | Tickets assigned to the fix version                  |
-| `release-related-work.sh` | Related work links                                 |
-| `release-sections.sh`   | Release Notes section (title, plain text, ADF)       |
+| `fetch-release.js`      | Run the full get into one output directory           |
+| `resolve-release-id.js` | Parse version ID from URL, ID, or project + name |
+| `release.js`            | Status, start date, release date, description (`full`, `summary`, `json`) |
+| `release-stages.js`     | Stage list and current stage                         |
+| `release-issues.js`     | Tickets assigned to the fix version                  |
+| `release-related-work.js` | Related work links                                 |
+| `release-sections.js`   | Release Notes section (title, plain text, ADF)       |
 
 Set `JIRA_RELEASE_MAX_ISSUES=100` to change pagination page size (default 100).
 

@@ -1,6 +1,6 @@
 # Cursor skills — Jira, Confluence, and GitHub
 
-Scripts live under `.cursor/skills/<skill-name>/scripts/`. Jira and Confluence scripts load `ATLASSIAN_USER` and `ATLASSIAN_TOKEN` from the workspace `.env`. Setup is the Atlassian credentials rule.
+Scripts live under `.cursor/skills/<skill-name>/scripts/`. The skill scripts rule says how a script is run. Jira and Confluence scripts load `ATLASSIAN_USER` and `ATLASSIAN_TOKEN` from the workspace `.env`. Setup is the Atlassian credentials rule.
 
 ## Skill map
 
@@ -13,10 +13,11 @@ Scripts live under `.cursor/skills/<skill-name>/scripts/`. Jira and Confluence s
 | [create-jira-release](create-jira-release/SKILL.md)                             | `/create-jira-release …`                   | Create a Jira release and its Release Notes section |
 | [edit-jira-release](edit-jira-release/SKILL.md)                                 | `/edit-jira-release …`                     | Change an existing Jira release, its note, or its stages |
 | [create-confluence-page](create-confluence-page/SKILL.md)                       | (manual)                                   | Generic Confluence create/update                  |
-| [github-cli-via-docker](github-cli-via-docker/SKILL.md)                         | `/github-cli-via-docker`                   | Run `gh` through the `dwt-gh` Docker image        |
-| [seed-repos](seed-repos/SKILL.md)                                               | `/seed-repos`                              | Clone the user's DEFRA team repositories into `repos/` |
+| [github-cli-via-docker](github-cli-via-docker/SKILL.md)                         | `/github-cli-via-docker`                   | Provide the `gh` command through the `dwt-gh` image |
+| [get-defra-team-repos](get-defra-team-repos/SKILL.md)                           | `/get-defra-team-repos`                    | Save the user's DEFRA team repositories under `.tmp` |
+| [seed-repos](seed-repos/SKILL.md)                                               | `/seed-repos`                              | Clone the saved DEFRA team repositories into `repos/` |
 
-Planning or writing API tests from a ticket stays in `digital-waste-tracking-uat` (`create-uat-tests-from-jira`).
+Planning or writing API tests from a ticket stays in `digital-waste-tracking-uat`.
 
 **Read skills** fetch data to `.tmp/` and return full contents — do not guess from memory.
 
@@ -41,7 +42,7 @@ get-jira-release
 ## Shared conventions
 
 - Credentials are read from the workspace `.env` (gitignored). Copy `.env.example` to `.env`
-- Output under `.tmp/` (gitignored) — `jira-tickets/`, `jira-releases/`, `release-notes/`, `confluence-drafts/`. Shareable generated files go in `generated/`
+- Output under `.tmp/` (gitignored) — `jira-tickets/`, `jira-releases/`, `release-notes/`, `confluence-drafts/`, `defra-team-repos/`. Shareable generated files go in `generated/`
 - On script failure: stop and report the exact error
 - Ticket keys: `DWT-*` and `DWTA-*` both appear in this programme; use the key from the ticket or release
 
@@ -55,4 +56,6 @@ get-jira-release ──► edit-jira-release
                  └──► create-jira-release
 
 get-confluence-page ──► create-confluence-page
+
+get-defra-team-repos ──► seed-repos
 ```

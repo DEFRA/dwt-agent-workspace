@@ -20,3 +20,5 @@ SPI board: https://eaflood.atlassian.net/jira/software/c/projects/DWTSPI/boards/
 WOE board: https://eaflood.atlassian.net/jira/software/c/projects/DR/boards/16635
 
 Releases for these three teams are Jira fix versions on that project.
+
+There is no default project. Use the project key from the ticket, the release, or the name the user gave. Ask when none of those is known.

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Git
 
-This workspace root is the git repository `dwt-agent-workspace`. Service repositories live in `repos/`, which is gitignored. The `seed-repos` skill fills `repos/` from the logged-in user's DEFRA team and leaves a repository that is already there.
+This workspace root is the git repository `dwt-agent-workspace`. Service repositories live in `repos/`, which is gitignored. `get-defra-team-repos` saves the logged-in user's DEFRA team repositories. `seed-repos` clones that list into `repos/` and leaves a repository that is already there.
 
 Do not run git unless the user asks in the current request. That includes status, fetch, checkout, branch, commit, rebase, and push.
 

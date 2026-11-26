@@ -1,0 +1,2 @@
+#!/bin/sh
+exec docker run --rm -v "$HOME/.config/gh:/root/.config/gh" dwt-gh "$@"

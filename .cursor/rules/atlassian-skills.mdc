@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Jira, Confluence, and GitHub
 
-Skills in `.cursor/skills/` read and write Jira, Confluence, and minted CDP service versions. Read `.cursor/skills/README.md` and the skill named in that README before running a script.
+Skills in `.cursor/skills/` read and write Jira, Confluence, and minted CDP service versions. Read `.cursor/skills/README.md` and the skill named in that README before running a script. The skill scripts rule says how a script is run.
 
 Credentials come from `.env`. The Atlassian credentials rule says how that file is set up.
 

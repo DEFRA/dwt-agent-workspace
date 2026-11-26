@@ -1,117 +1,95 @@
 #!/bin/bash
-# Resolve minted CDP service version for a merged GitHub PR
-# Usage: ./pr-version.sh <pr_url_or_owner/repo#number>
-#
-# Examples:
-#   ./pr-version.sh https://github.com/DEFRA/waste-movement-backend/pull/113
-#   ./pr-version.sh DEFRA/waste-movement-backend 113
+# Resolve the CDP service version minted by a merged pull request. Uses gh, which is logged in for the DEFRA org.
 
-set -e
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../lib/load-env.sh"
+set -euo pipefail
 
-INPUT="${1:-}"
-PR_NUMBER="${2:-}"
+# This file is .cursor/skills/get-pr-service-version/scripts/pr-version.sh. The workspace root is four directories above it.
+root=$(cd "$(dirname "$0")/../../../.." && pwd)
 
-GITHUB_ORG="${GITHUB_ORG:-DEFRA}"
-
-SERVICE_REPOS="waste-movement-backend waste-movement-external-api waste-tracking-id-backend"
-
-if [[ -z "$INPUT" ]]; then
-  echo "Usage: ./pr-version.sh <pr_url> OR ./pr-version.sh <owner/repo> <pr_number>"
+if [[ $# -lt 1 || -z "${1:-}" ]]; then
+  echo 'Usage: bash pr-version.sh <pr_url> OR bash pr-version.sh <owner/repo> <pr_number>' >&2
   exit 1
 fi
 
-if [[ "$INPUT" =~ ^https?://github.com/ ]]; then
-  if [[ "$INPUT" =~ github.com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
-    GITHUB_ORG="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-    PR_NUMBER="${BASH_REMATCH[3]}"
-  else
-    echo "Error: unable to parse PR URL: $INPUT"
+org=DEFRA
+if [[ -f "$root/.env" ]]; then
+  org_line=$(grep -E '^GITHUB_ORG=' "$root/.env" | tail -n 1 || true)
+  if [[ -n "$org_line" ]]; then
+    org=${org_line#GITHUB_ORG=}
+    org=${org#\"}
+    org=${org%\"}
+    org=${org#\'}
+    org=${org%\'}
+  fi
+fi
+
+input=$1
+number=${2:-}
+repo=
+if [[ "$input" =~ ^https?://github.com/ ]]; then
+  if [[ ! "$input" =~ github\.com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
+    echo "Error: unable to parse PR URL: $input" >&2
     exit 1
   fi
-elif [[ -n "$PR_NUMBER" ]]; then
-  if [[ "$INPUT" =~ / ]]; then
-    GITHUB_ORG="${INPUT%%/*}"
-    REPO="${INPUT#*/}"
+  org=${BASH_REMATCH[1]}
+  repo=${BASH_REMATCH[2]}
+  number=${BASH_REMATCH[3]}
+elif [[ -n "$number" ]]; then
+  if [[ "$input" == */* ]]; then
+    org=${input%%/*}
+    repo=${input#*/}
   else
-    REPO="$INPUT"
+    repo=$input
   fi
 else
-  echo "Error: provide PR URL or owner/repo and PR number"
+  echo 'Error: provide PR URL or owner/repo and PR number' >&2
   exit 1
 fi
 
-AUTH_ARGS=()
-if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-  AUTH_ARGS=(-H "Authorization: Bearer $GITHUB_TOKEN")
-fi
-
-pr_response=$(curl -s "${AUTH_ARGS[@]}" \
-  -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/$GITHUB_ORG/$REPO/pulls/$PR_NUMBER")
-
-if echo "$pr_response" | jq -e '.message' > /dev/null 2>&1; then
-  echo "Error: $(echo "$pr_response" | jq -r '.message')"
+if ! row=$(gh api "repos/${org}/${repo}/pulls/${number}" \
+  --jq '[.title, .html_url, (.merged|tostring), (.merged_at // ""), (.merge_commit_sha // "")] | @tsv'); then
+  echo "Error: could not read ${org}/${repo}#${number}" >&2
   exit 1
 fi
 
-merged=$(echo "$pr_response" | jq -r '.merged')
+IFS=$'\t' read -r title url merged merged_at sha <<< "$row"
 if [[ "$merged" != "true" ]]; then
-  echo "Error: PR $GITHUB_ORG/$REPO#$PR_NUMBER is not merged"
+  echo "Error: PR ${org}/${repo}#${number} is not merged" >&2
   exit 1
 fi
 
-TITLE=$(echo "$pr_response" | jq -r '.title')
-MERGE_SHA=$(echo "$pr_response" | jq -r '.merge_commit_sha')
-MERGED_AT=$(echo "$pr_response" | jq -r '.merged_at')
-PR_URL=$(echo "$pr_response" | jq -r '.html_url')
+service=false
+case "$repo" in
+  waste-movement-backend|waste-movement-external-api|waste-tracking-id-backend) service=true ;;
+esac
 
-is_service=false
-for service_repo in $SERVICE_REPOS; do
-  if [[ "$REPO" == "$service_repo" ]]; then
-    is_service=true
-    break
-  fi
-done
-
-TAG=""
-if [[ "$is_service" == true ]]; then
-  PAGE=1
-  while [[ -z "$TAG" && $PAGE -le 10 ]]; do
-    tags_response=$(curl -s "${AUTH_ARGS[@]}" \
-      -H "Accept: application/vnd.github+json" \
-      "https://api.github.com/repos/$GITHUB_ORG/$REPO/tags?per_page=100&page=$PAGE")
-
-    TAG=$(echo "$tags_response" | jq -r --arg sha "$MERGE_SHA" '.[] | select(.commit.sha == $sha) | .name' | head -1)
-
-    tag_count=$(echo "$tags_response" | jq 'length')
-    if [[ "$tag_count" -lt 100 ]]; then
-      break
-    fi
-    PAGE=$((PAGE + 1))
-  done
+tag=
+if [[ "$service" == "true" && -n "$sha" ]]; then
+  tag=$(gh api --paginate "repos/${org}/${repo}/tags?per_page=100" \
+    --jq ".[] | select(.commit.sha==\"${sha}\") | .name")
+  tag=${tag%%$'\n'*}
 fi
 
-{
-  echo "=== PR $GITHUB_ORG/$REPO#$PR_NUMBER ==="
-  echo "Title: $TITLE"
-  echo "URL: $PR_URL"
-  echo "Merged: $MERGED_AT"
-  echo "Merge commit: $MERGE_SHA"
-  echo "Service repo: $is_service"
-  echo ""
+cat <<EOF
+=== PR ${org}/${repo}#${number} ===
+Title: ${title}
+URL: ${url}
+Merged: ${merged_at}
+Merge commit: ${sha}
+Service repo: ${service}
+EOF
 
-  if [[ -n "$TAG" ]]; then
-    echo "Version: $TAG"
-  else
-    if [[ "$is_service" == true ]]; then
-      echo "Version: (not found on merge commit)"
-      echo "Note: CDP service repos should tag the merge commit when Publish workflow runs."
-      echo "Check the Publish workflow run on main for this merge."
-    else
-      echo "Version: (own version on merge to main — not a service version)"
-      echo "Note: $REPO mints its own version on merge to main. That version is not a service version."
-    fi
-  fi
-}
+if [[ -n "$tag" ]]; then
+  echo "Version: ${tag}"
+elif [[ "$service" == "true" ]]; then
+  cat <<EOF
+Version: (not found on merge commit)
+Note: CDP service repos should tag the merge commit when Publish workflow runs.
+Check the Publish workflow run on main for this merge.
+EOF
+else
+  cat <<EOF
+Version: (own version on merge to main — not a service version)
+Note: ${repo} mints its own version on merge to main. That version is not a service version.
+EOF
+fi
