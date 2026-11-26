@@ -6,9 +6,9 @@ targets:
 ---
 # Rulesync
 
-Edit shared rules in `.rulesync/rules/` and skills in `.rulesync/skills/`. `rulesync generate` writes Cursor files under `.cursor/` and Claude Code files to `CLAUDE.md` and `.claude/`. `.gitignore` ignores `.cursor/`, `.claude/`, `CLAUDE.md`, and `AGENTS.md`. A source rule with `root: true` is written to `CLAUDE.md`. The rulesync rule says when those files are regenerated, and the reply to give when the user asks to edit a generated file. The first sentence of that reply is in capital letters.
+Edit shared rules in `.rulesync/rules/` and skills in `.rulesync/skills/`. `rulesync generate` writes Cursor files under `.cursor/` and Claude Code files to `CLAUDE.md` and `.claude/`. `.gitignore` ignores `.cursor/`, `.cursorignore`, `.claude/`, `CLAUDE.md`, and `AGENTS.md`. A source rule with `root: true` is written to `CLAUDE.md`. The rulesync rule says when those files are regenerated, and the reply to give when the user asks to edit a generated file. The first sentence of that reply is in capital letters.
 
-`RULESYNC_TOOL` in `.env` is `cursor` or `claude`. `bin/rulesync/Dockerfile` builds the `dwt-rulesync` image. `RULESYNC_VERSION` is the rulesync release it installs. `bin/rulesync/rulesync` builds that image and runs at the repository root. Pass `--command=import` or `--command=generate`, and `--tool=cursor` or `--tool=claude`. Add `--delete` to remove a generated file the source no longer has. When `--tool` is omitted, the script uses `RULESYNC_TOOL`. `claude` selects the `claudecode` target. The features are `rules` and `skills`.
+`RULESYNC_TOOL` in `.env` is `cursor` or `claude`. `bin/rulesync/Dockerfile` builds the `dwt-rulesync` image. `RULESYNC_VERSION` is the rulesync release it installs. `bin/rulesync/rulesync` builds that image and runs at the repository root. Pass `--command=import` or `--command=generate`, and `--tool=cursor` or `--tool=claude`. Add `--delete` to remove a generated file the source no longer has. When `--tool` is omitted, the script uses `RULESYNC_TOOL`. `claude` selects the `claudecode` target. The features are `rules`, `skills`, and `ignore`. `.rulesync/.aiignore` lists `repos/*/env.sh`. The rulesync rule says where generate writes that list.
 
 ```bash
 bin/rulesync/rulesync --command=generate --tool=cursor --delete

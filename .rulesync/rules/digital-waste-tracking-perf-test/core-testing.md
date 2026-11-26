@@ -1,0 +1,139 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-perf-test. Core Performance Testing Principles
+  and Guidelines
+globs:
+  - 'repos/digital-waste-tracking-perf-test/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-perf-test. Core Performance Testing Principles
+    and Guidelines
+---
+# Core Performance Testing Principles and Guidelines
+
+## Purpose
+This repository is dedicated to **performance testing only**. It does NOT handle functional testing, business logic validation, or API contract testing.
+
+## Test Focus Areas
+- **Load Testing**: Normal expected load (50 users)
+- **Stress Testing**: Beyond normal capacity (100 users)
+- **Spike Testing**: Sudden load bursts (10→75→10 users)
+
+**Note**: Soak testing (long-duration tests for memory leaks/resource exhaustion) is not supported due to CDP Platform's 2-hour maximum runtime limit.
+
+## What NOT to Test
+- Business logic correctness (handled by regression pack)
+- API contract validation (handled by regression pack)
+- Edge case handling (handled by regression pack)
+- Basic connectivity (handled by regression pack)
+
+## Test Organization
+- `scenarios/create-waste-movement/successfully/` - Create operation tests
+- `scenarios/update-waste-movement/successfully/` - Update operation tests (two-step workflow: create + update)
+- Each operation has: `baseline-test.jmx`, `load-test.jmx`, `spike-test.jmx`, `stress-test.jmx`
+
+## Test Intensity Guidelines
+
+### Baseline Tests (Functional Validation)
+
+#### Create Operations (Single Step)
+- **User Count**: 1 user
+- **Duration**: Single request
+- **Ramp-up**: 1 second
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 2 seconds
+- **Purpose**: Functional validation and baseline metrics
+
+#### Update Operations (Two-Step Workflow)
+- **User Count**: 1 user
+- **Duration**: Single request
+- **Ramp-up**: 1 second
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 2 seconds
+- **Purpose**: Functional validation and baseline metrics
+
+### Load Tests (Normal Expected Load)
+
+#### Create Operations (Single Step)
+- **User Count**: 50 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 3 seconds
+- **Purpose**: Test performance under normal expected load for simple operations
+
+#### Update Operations (Two-Step Workflow)
+- **User Count**: 50 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 3 seconds
+- **Purpose**: Test performance under normal expected load for complex workflows
+
+### Stress Tests (Beyond Normal Capacity)
+
+#### Create Operations (Single Step)
+- **User Count**: 100 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 5 seconds
+- **Purpose**: Find breaking points for simple operations
+
+#### Update Operations (Two-Step Workflow)
+- **User Count**: 100 users
+- **Duration**: 10 minutes (600s)
+- **Ramp-up**: 1 minute (60s)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 5 seconds
+- **Purpose**: Find breaking points for complex workflows
+
+### Spike Tests (Sudden Load Bursts)
+
+#### Both Create and Update Operations
+- **Phase 1**: 10 users, 30s ramp-up, 3min duration (baseline)
+- **Phase 2**: 75 users, 5s ramp-up, 3min duration (dramatic spike)
+- **Phase 3**: 10 users, 10s ramp-up, 3min duration (recovery)
+- **Total Duration**: ~9 minutes (3min + 3min + 3min)
+- **Think Time**: 500±1000ms (500-1500ms total)
+- **Response Time Threshold**: 8 seconds (all phases)
+
+## Response Time Monitoring Strategy
+
+### APDEX (Application Performance Index)
+- **Purpose**: Measures user satisfaction with response times
+- **Scoring**: 0.0-1.0 scale (1.0 = excellent, 0.5 = poor, 0.0 = unacceptable)
+- **Zones**: Satisfied (≤500ms), Tolerating (500ms-1.5s), Frustrated (>1.5s)
+- **Use**: Business metrics, user experience reporting, trend analysis
+
+### DurationAssertion (Technical Failure Detection)
+- **Purpose**: Hard pass/fail threshold for test execution
+- **Scoring**: Binary (pass/fail) based on single request
+- **Thresholds**: Higher than APDEX zones to catch only catastrophic failures
+- **Use**: Test validation, CI/CD gates, immediate feedback
+
+### Alignment Strategy
+- **APDEX**: Shows user satisfaction (frustrated at >1.5s)
+- **DurationAssertion**: Catches technical failures (2s, 3s, 5s, 8s thresholds)
+- **Gap**: 0.5s-6.5s buffer allows user frustration before test failure
+- **Result**: Layered monitoring for both user experience and technical performance
+
+## Test Selection Guidelines
+- Start with load tests to establish baseline
+- Use stress tests to find breaking points
+- Use spike tests to verify recovery capabilities
+- Adjust user counts based on service capacity
+- Monitor resource utilization during tests
+- Use APDEX scores for business reporting and user experience insights
+- Use DurationAssertion for technical failure detection and CI/CD gates
+
+## Key Principles
+1. Focus on performance metrics: response times, throughput, resource utilization
+2. Test under various load conditions, not business scenarios
+3. Use realistic but performance-focused test data
+4. Measure and report performance characteristics
+5. Avoid duplicating functional test coverage

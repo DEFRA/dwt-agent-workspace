@@ -1,0 +1,20 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-fe-uat. This repository is a QA pack. Prefer
+  readable code over efficiency.
+globs:
+  - 'repos/digital-waste-tracking-fe-uat/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-fe-uat. This repository is a QA pack. Prefer
+    readable code over efficiency.
+---
+# QA pack
+
+This repository is a QA pack. It is not a running service. Readability is prized over efficiency.
+
+Prefer a clear name and a straight sequence. A little repeated code is fine when it is easier to follow. Do not add a cache, a pool, or a compressed helper whose only purpose is to save work at runtime.

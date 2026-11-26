@@ -1,0 +1,165 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-perf-test. Development Workflow and LLM
+  Interaction Guidelines
+globs:
+  - 'repos/digital-waste-tracking-perf-test/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-perf-test. Development Workflow and LLM
+    Interaction Guidelines
+---
+# Development Workflow and LLM Interaction Guidelines
+
+## Repository Understanding
+- This is a JMeter-based performance testing repository for CDP Platform
+- Focus is on load, stress, and spike testing only
+- Functional testing is handled by a separate regression pack
+- Tests use Groovy scripts for dynamic payload generation
+- Uses a shared OAuth2 authentication pattern for public API tests, and a backend Basic-auth + API key pattern for bulk backend tests
+
+## Key Files to Understand
+- `scenarios/` - Contains organized JMX test files by operation and test type
+- `scripts/auth/get_accessToken.groovy` - Shared OAuth2 authentication (skipped when ENVIRONMENT=local)
+- `scripts/config/configure_waste_movement_external_api_url.groovy` - Derives public API URL from ENVIRONMENT (localhost:3001 local; waste-movement-external-api.api.${env}.cdp-int.defra.cloud otherwise)
+- `scripts/config/configure_waste_movement_backend_url.groovy` - Derives bulk backend URL from ENVIRONMENT and CI
+- `scripts/payloads/create_waste_movement_payload.groovy` - Dynamic payload generation for create operations (sets `${postPayload}`)
+- `scripts/payloads/update_waste_movement_payload.groovy` - Dynamic payload generation for update operations (sets `${putPayload}`)
+- `scripts/payloads/bulk_create_waste_movement_payload.groovy` - Dynamic payload generation for bulk create operations (sets `${bulkPostPayload}`)
+- `scripts/payloads/bulk_update_waste_movement_payload.groovy` - Dynamic payload generation for bulk update operations (sets `${bulkPutPayload}`)
+- `scripts/logging/after-response-log-hook.groovy` - Logs 4xx/5xx request/response (when `DEBUG=true`); runs when the response is returned, before assertions
+- `scripts/headers/remove_cdp_request_id_when_not_local.groovy` - Removes x-cdp-request-id header when ENVIRONMENT≠local (public API tests only)
+- `local-entrypoint.sh` - Local development script with shared authentication
+- `entrypoint.sh` - Docker container entry point
+- `Dockerfile` - Container configuration
+
+## Test Organization
+- `scenarios/create-waste-movement/successfully/` - Create operation tests
+- `scenarios/update-waste-movement/successfully/` - Update operation tests (two-step workflow: create + update)
+- `scenarios/bulk-create-waste-movement/successfully/` - Bulk create operation tests
+- `scenarios/bulk-update-waste-movement/successfully/` - Bulk update (create + update) operation tests
+- Each operation has: `baseline-test.jmx`, `load-test.jmx`, `spike-test.jmx`, `stress-test.jmx`
+
+## Adding New Tests
+1. Determine appropriate test category (load/stress/spike)
+2. Create JMX file in correct folder
+3. Use existing payload files with appropriate testType
+4. Configure realistic user counts and durations
+5. Test locally before committing
+6. Update documentation
+
+## Modifying Existing Tests
+1. Understand the test's purpose and intensity level
+2. Make minimal changes to maintain test integrity
+3. Test changes locally
+4. Update documentation if test behavior changes
+5. Consider impact on other tests
+
+## Payload Changes
+1. Update payload files when API changes
+2. Test with all test types to ensure compatibility
+3. Maintain backward compatibility when possible
+4. Update documentation for payload changes
+5. Verify JMeter variable usage
+
+## Test Organization
+1. Keep tests organized by purpose and intensity
+2. Use consistent naming conventions
+3. Avoid creating redundant tests
+4. Focus on performance testing only
+5. Remove tests that duplicate regression pack coverage
+
+## Quality Assurance
+1. Test all changes locally before committing
+2. Verify test configuration and parameters
+3. Check payload file accessibility
+4. Validate test results and assertions
+5. Ensure tests run successfully in CDP environment
+6. **CDP Runtime Limit**: Ensure individual test durations don't exceed 2 hours
+7. **Test Pack Execution**: Run individual tests rather than complete suite due to 2h 22m total duration
+
+## Running JMeter Tests
+
+### Using the Entrypoint Script
+1. **Set Environment Variables**: Ensure all required environment variables are set in `env.sh`, including `ENVIRONMENT`, `PROFILE`, `CI`, and authentication-related values.
+2. **Run Profile Locally**: `./entrypoint.sh` (uses `PROFILE` from `env.sh` or the shell environment).
+   - `PROFILE=external-api` runs all create/update public API tests.
+   - `PROFILE=bulk-upload` runs all bulk backend tests.
+   - `PROFILE=all` runs every JMX under `scenarios/`.
+3. **Run Individual Test**: Set `PROFILE` to a specific JMX path under `scenarios/` (e.g. `bulk-update-waste-movement/successfully/baseline-test.jmx`) and run `./entrypoint.sh`.
+4. **CI Mode**: Set `CI=true` (and `RESULTS_OUTPUT_S3_PATH` / `S3_ENDPOINT`) so `entrypoint.sh` publishes results for CDP Platform.
+
+### Required Environment Variables
+- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod, or `local` for local dev – skips OAuth, uses localhost URLs)
+- `TEST_SCENARIO`: JMX file path or "all" for all tests
+- `CI`: "true" for CDP Platform, "false" for local development
+- `COGNITO_CLIENT_ID`, `COGNITO_CLIENT_SECRET`, `COGNITO_OAUTH_BASE_URL`: Required for public API tests when ENVIRONMENT≠local; optional for local (OAuth skipped)
+- `ORGANISATION_API_ID`: Organization API ID
+
+### Test Execution Flow
+1. **Cleanup**: Removes previous test results from `reports/`, `logs/`, `results/` directories
+2. **Authentication**: Gets OAuth2 token using shared authentication script
+3. **Test Execution**: Runs JMX files with proper environment variables
+4. **Report Generation**: Creates HTML report from CSV results
+5. **Output**: Opens report in browser (local) or uploads to S3 (CI)
+
+### Directory Structure
+- `scenarios/`: JMX test files organized by operation and test type
+- `scripts/`: Groovy scripts for authentication and payload generation
+- `reports/`: Generated HTML reports (gitignored)
+- `logs/`: JMeter execution logs (gitignored)
+- `results/`: CSV result files (gitignored)
+- `temp/`: Temporary files generated during test execution (gitignored)
+
+## When Making Changes
+1. Always consider the performance testing focus
+2. Maintain the organized folder structure
+3. Use Groovy scripts for dynamic payload generation instead of embedded JSON
+4. Follow naming conventions and documentation standards
+5. Test changes locally before suggesting them
+6. Use descriptive names that clearly indicate what each component does
+7. For multi-step workflows, names should reflect the complete process
+8. Use `${postPayload}` for POST/create operations and `${putPayload}` for PUT/update operations
+9. Always include shared authentication JSR223PreProcessor at Test Plan level
+10. Use HTTP Arguments (not postBodyRaw) for complex JSON payloads
+
+## Common Tasks
+- Adding new performance tests
+- Modifying existing test configurations
+- Updating Groovy payload scripts for API changes (including bulk payload scripts)
+- Organizing tests by intensity level
+- Updating documentation
+- Managing authentication across multiple JMX files (public OAuth2 and bulk backend patterns)
+
+## What NOT to Do
+- Don't add functional testing (handled by regression pack)
+- Don't embed JSON directly in JMX files
+- Don't create redundant tests
+- Don't break the organized folder structure
+- Don't ignore documentation updates
+- Don't use postBodyRaw for complex JSON payloads
+- Don't hardcode authentication in individual JMX files
+- Don't create soak tests (not supported due to CDP 2-hour runtime limit)
+
+## Best Practices
+- Always read existing documentation first
+- Understand the test organization before making changes
+- Use consistent naming and structure
+- Focus on performance testing objectives
+- Maintain compatibility with CDP Platform
+- Use descriptive names that explain functionality, not implementation details
+- Avoid static values in names (user counts, etc.) - use configuration instead
+- For complex workflows, ensure names reflect the complete process
+- Always use shared authentication pattern
+- Use HTTP Arguments for JSON payloads with variable substitution
+
+## Documentation Updates
+1. Update relevant documentation when making changes
+2. Keep documentation current and accurate
+3. Include examples and usage instructions
+4. Document any breaking changes
+5. Maintain consistency across all documentation

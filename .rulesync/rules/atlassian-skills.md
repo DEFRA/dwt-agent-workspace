@@ -24,6 +24,6 @@ Fetched output goes in the folders named by the generated artifacts rule. Read t
 
 A skill that writes to Jira or Confluence drafts locally first. Confirm with the user before that write.
 
-Planning or writing API tests from a ticket stays in `digital-waste-tracking-uat`.
+Planning or writing API tests from a ticket uses create-uat-tests-from-jira in `.rulesync/skills/digital-waste-tracking-uat/`. That skill applies only while the work is in `repos/digital-waste-tracking-uat/`.
 
 NWM, SPI, and WOE releases are Jira fix versions. Read `.cursor/rules/jira-release-description.mdc` before creating or editing a release. Use create-jira-release to create a release and edit-jira-release to change a release.

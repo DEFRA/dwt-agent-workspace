@@ -1,0 +1,152 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-perf-test. Environment Configuration and
+  Management Rules
+globs:
+  - 'repos/digital-waste-tracking-perf-test/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-perf-test. Environment Configuration and
+    Management Rules
+---
+# Environment Configuration and Management Rules
+
+## Environment Variable Strategy
+This repository uses a **command-line properties approach** for JMeter configuration, which provides maximum flexibility and clear separation between configuration and business logic.
+
+## File Structure
+- `env.sh` - Local development and CI environment variables (gitignored)
+- `env.sh.template` - Template showing required environment variables
+- `entrypoint.sh` - Script for local and CI/CD execution
+- `.gitignore` - Excludes sensitive environment files
+
+## Environment Variable Flow
+1. **Development**: Load `env.sh` to set environment variables
+2. **Scripts**: Pass environment variables as JMeter properties via `-J` parameters
+3. **JMeter**: Uses `${__P(propertyName)}` to access properties in test plans
+4. **CI/CD**: Environment variables are set by the CI/CD system
+
+## Configuration Files
+
+### env.sh (Local Development)
+```bash
+#!/bin/sh
+# Usage: source ./env.sh
+
+export ENVIRONMENT=dev
+export COGNITO_CLIENT_ID=your-client-id
+export COGNITO_CLIENT_SECRET=your-client-secret
+export COGNITO_OAUTH_BASE_URL=waste-movement-external-api-c63f2.auth.eu-west-2.amazoncognito.com
+export ORGANISATION_API_ID=your-org-id
+```
+
+### local-entrypoint.sh (Local Development)
+```bash
+#!/bin/bash
+source ./env.sh
+
+jmeter -n -t scenarios/create-waste-movement/successfully/baseline-test.jmx \
+  -l results.jtl -e -o reports/ \
+  -Jenvironment=${ENVIRONMENT} \
+  -JorganisationApiId=${ORGANISATION_API_ID} \
+  -JclientId=${COGNITO_CLIENT_ID} \
+  -JclientSecret=${COGNITO_CLIENT_SECRET} \
+  -JauthBaseUrl=${COGNITO_OAUTH_BASE_URL} \
+  -Jjmeter.save.saveservice.response_data=true \
+  # ... additional JMeter properties
+```
+
+## Usage Patterns
+
+### Local Development
+```bash
+# Load environment variables and run test
+./local-entrypoint.sh
+```
+
+### Using Entrypoint Script
+```bash
+# Entrypoint automatically loads env.sh if present and uses PROFILE to select tests
+ENVIRONMENT=dev PROFILE=external-api CI=false ./entrypoint.sh
+```
+
+### CI/CD Environment
+```bash
+# Environment variables are set by CI/CD system
+# Scripts pass them as JMeter properties
+./entrypoint.sh
+```
+
+## Required Environment Variables
+- `ENVIRONMENT`: Target environment (dev, test, perf-test, prod, local). Use `local` for local development; URLs resolve to localhost and OAuth is skipped.
+- `PROFILE`: Test profile – one of:
+  - `external-api` (all create/update public API JMXs)
+  - `bulk-upload` (all bulk create/update backend JMXs)
+  - `all` (all JMXs under `scenarios/`)
+  - or a relative JMX path under `scenarios/` (e.g. `bulk-update-waste-movement/successfully/baseline-test.jmx`)
+- `CI`: `"true"` for CDP Platform runs, `"false"` for local development
+- `COGNITO_CLIENT_ID`: OAuth2 client ID (public API tests)
+- `COGNITO_CLIENT_SECRET`: OAuth2 client secret (public API tests)
+- `COGNITO_OAUTH_BASE_URL`: OAuth2 base URL (public API tests)
+- `API_CODE`: API code used by the OAuth2 access token script
+- `SERVICE_AUTH_WASTE_ORGANISATION_BACKEND`: Service-to-service auth value for bulk tests (passed to JMeter as `serviceAuthWasteOrganisationBackend`)
+- `CDP_API_KEY`: API key used by bulk backend tests (`x-api-key` header)
+
+Bulk backend URL (domain, protocol, port) is derived from `ENVIRONMENT` and `CI` by `scripts/config/configure_waste_movement_backend_url.groovy` – no separate env vars.
+
+### Optional Environment Variables
+- `HTTP_PROXY`: HTTP proxy URL (e.g. `http://proxy.example:3128`); if set, `entrypoint.sh` configures JMeter proxy host/port.
+- `DEBUG`: `"true"` / `"false"` string passed as `-Jdebug` to JMeter. When `"true"`, `scripts/logging/after-response-log-hook.groovy` logs full request/response for 4xx/5xx responses (runs when response is returned, before assertions) to JMeter log and console.
+- `RUN_ID`: Identifier logged when `CI=true` to correlate runs in the CDP portal.
+- `RESULTS_OUTPUT_S3_PATH`: S3 URI where CI runs upload JMeter results and HTML reports.
+- `S3_ENDPOINT`: Endpoint URL for S3-compatible storage (e.g. LocalStack in local testing).
+
+## Test Execution Flow
+1. **Cleanup**: Removes previous test results from `reports/`, `logs/`, `results/` directories.
+2. **Authentication Configuration**: Passes OAuth2 and backend auth properties (`apiCode`, `clientId`, `clientSecret`, `authBaseUrl`, `serviceAuthPasswordWasteOrganisationBackend`, `cdpApiKey`) into JMeter via `-J` properties.
+3. **Test Selection**: Uses `PROFILE` to determine which JMX files under `scenarios/` to run and executes them in sequence, appending all samples into a single `results/results.jtl`.
+4. **Report Generation**: Generates a consolidated HTML report from the combined JTL into `reports/`.
+5. **Output / Publishing**:
+   - **Local (`CI=false`)**: Prints the report path and opens it in a browser when possible.
+   - **CI (`CI=true`)**: Uploads the JTL, logs, and HTML report directory to `RESULTS_OUTPUT_S3_PATH` using the configured `S3_ENDPOINT`.
+
+## Directory Structure
+- `scenarios/`: JMX test files organized by operation and test type
+- `scripts/`: Groovy scripts for authentication and payload generation
+- `reports/`: Generated HTML reports (gitignored)
+- `logs/`: JMeter execution logs (gitignored)
+- `results/`: CSV result files (gitignored)
+- `temp/`: Temporary files generated during test execution (gitignored)
+
+## Security Guidelines
+1. **Never commit** `env.sh` with real credentials
+2. **Use** `env.sh.template` as a template for required variables
+3. **Add** new environment files to `.gitignore`
+4. **Rotate** credentials regularly
+5. **Use** CI/CD secrets for production environments
+
+## Adding New Environment Variables
+1. Add to `env.sh.template` with placeholder values
+2. Add to `env.sh` with real values (local only)
+3. Add `-JpropertyName=${VARIABLE_NAME}` to entrypoint scripts
+4. Update CI/CD environment configuration
+5. Use `${__P(propertyName)}` in JMeter test plans
+6. Document the new variable in this file
+
+## Troubleshooting
+- **Variables not loading**: Ensure `env.sh` is sourced before running scripts
+- **Empty values**: Check that environment variables are exported (not just set)
+- **Wrong values**: Verify scripts pass correct variable names as properties
+- **CI/CD issues**: Ensure environment variables are set in CI/CD system
+
+## Benefits of This Approach
+- **Clean**: All configuration externalized from JMX files
+- **Maintainable**: Properties managed in scripts, not test plans
+- **Secure**: Sensitive values in gitignored files
+- **Flexible**: Easy to override for different environments
+- **Debuggable**: Clear separation between config and business logic
+- **Portable**: Test plans work across environments without modification

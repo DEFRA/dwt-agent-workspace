@@ -1,0 +1,42 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. Environment and execution rules
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.test.js'
+  - 'repos/digital-waste-tracking-uat/**/test/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/specs/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/*.md'
+  - 'repos/digital-waste-tracking-uat/**/*.sh'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. Environment and execution rules
+---
+# Environment & Execution
+
+- **Source Environment**: Always source the environment file (`env.sh`) before running commands or tests
+- **Jest Configuration**: Prefix Jest commands with `NODE_OPTIONS='--experimental-vm-modules --no-warnings'` for ES modules support
+- **Read Documentation**: Read all .md files before suggesting or making changes
+
+## Environment Variable Management
+
+- **Unset First**: Always `unset` all environment variables at the top of `env.sh` before setting new values
+- **Prevent Pollution**: This prevents environment variable pollution when switching between environments
+- **Pattern**: Use `unset VARIABLE_NAME` for each environment variable before any `export` statements
+- **Example**:
+  ```sh
+  # First unset all environment variables
+  unset COGNITO_CLIENT_ID
+  unset COGNITO_CLIENT_SECRET
+  unset COGNITO_CLIENT_NAME
+  unset COGNITO_CLIENT_NAME_2
+  unset AUTH_DISABLED
+  
+  # Then set values for active environment
+  export COGNITO_CLIENT_ID=value
+  export COGNITO_CLIENT_NAME="Test_Client_1"
+  export COGNITO_CLIENT_NAME_2="Test_Client_2"
+  ```

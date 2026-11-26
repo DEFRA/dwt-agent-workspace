@@ -1,0 +1,103 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-perf-test. Cursor Rules for Digital Waste
+  Tracking Performance Tests
+globs:
+  - 'repos/digital-waste-tracking-perf-test/**/*'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-perf-test. Cursor Rules for Digital Waste
+    Tracking Performance Tests
+---
+# Cursor Rules for Digital Waste Tracking Performance Tests
+
+This directory contains comprehensive rules for LLMs working on this performance testing repository. These rules ensure consistent, high-quality interactions and maintain the repository's focus on performance testing.
+
+## Rule Files Overview
+
+### Core Rules
+- **`core-testing.mdc`** - Core performance testing principles, test intensity guidelines, and monitoring strategies
+- **`jmx-implementation.mdc`** - JMX file structure, patterns, naming conventions, and implementation guidelines
+- **`environment-config.mdc`** - Environment variable management, configuration files, and security guidelines
+- **`cdp-integration.mdc`** - CDP Platform integration, limitations, and execution strategies
+
+### Specialized Rules
+- **`payload-management.mdc`** - Rules for managing shared JSON payload files and Groovy scripts
+- **`shared-authentication.mdc`** - Shared authentication patterns and implementation
+- **`spike-testing.mdc`** - Detailed patterns and configuration for spike tests
+- **`workflow-guide.mdc`** - Development workflow, LLM interaction guidelines, and best practices
+- **`documentation.mdc`** - Documentation standards and requirements
+
+### Meta Rules
+- **`rule-structure.mdc`** - Documentation of the rule system structure and maintenance guidelines
+
+## Rule Structure and Maintenance
+
+### How Rules Are Organized
+1. **Core Rules**: Fundamental principles that apply to all aspects of the repository
+2. **Specialized Rules**: Specific technical areas with detailed implementation guidance
+3. **Cross-References**: Minimal cross-references to avoid circular dependencies
+4. **Single Source of Truth**: Each concept is documented in one primary location
+
+### Adding New Rules
+1. **Identify the Domain**: Determine if it's core functionality or specialized
+2. **Check for Duplication**: Ensure the concept isn't already covered in existing rules
+3. **Choose the Right File**: 
+   - Core concepts → `core-testing.mdc` or `jmx-implementation.mdc`
+   - Specialized topics → Create new file or add to existing specialized file
+4. **Follow Naming Convention**: Use kebab-case for file names (e.g., `new-feature.mdc`)
+5. **Include Metadata**: Always include description and globs in the frontmatter
+6. **Update README**: Add the new rule to this overview
+
+### Modifying Existing Rules
+1. **Single Source**: Update the primary location where the concept is documented
+2. **Check Dependencies**: Ensure changes don't break references in other files
+3. **Maintain Consistency**: Keep terminology and patterns consistent across all files
+4. **Update Cross-References**: If moving content, update any references to the new location
+
+### Rule File Guidelines
+- **Keep Focused**: Each file should have a clear, single purpose
+- **Avoid Duplication**: Don't repeat content that exists in other files
+- **Use Clear Headings**: Structure content with descriptive headings
+- **Include Examples**: Provide concrete examples where helpful
+- **Keep Updated**: Maintain rules as the repository evolves
+
+## Key Principles
+
+1. **Performance Focus**: This repository is for performance testing only, not functional testing
+2. **Organization**: Tests are organized by intensity level (load/stress/spike)
+3. **Reusability**: Use shared payload files instead of embedded JSON
+4. **CDP Integration**: Designed for CDP Platform execution
+5. **Documentation**: Maintain comprehensive documentation
+
+## Quick Reference
+
+- **Test Organization**: 
+  - Public API tests: `scenarios/create-waste-movement/successfully/`, `scenarios/update-waste-movement/successfully/`
+  - Bulk backend tests: `scenarios/bulk-create-waste-movement/successfully/`, `scenarios/bulk-update-waste-movement/successfully/`
+- **Payload Scripts**: 
+  - Public API: `scripts/create_waste_movement_payload.groovy`, `scripts/update_waste_movement_payload.groovy`
+  - Bulk: `scripts/payloads/bulk_create_waste_movement_payload.groovy`, `scripts/payloads/bulk_update_waste_movement_payload.groovy`
+- **Authentication**: 
+  - Public API shared OAuth2: `scripts/get_accessToken.groovy`
+  - Bulk backend auth: Basic auth + API key via environment variables passed as JMeter properties
+- **Logging**: `scripts/logging/after-response-log-hook.groovy` (runs when response is returned, before assertions; logs 4xx/5xx when `DEBUG=true`)
+- **Public API local headers**: `scripts/headers/remove_cdp_request_id_when_not_local.groovy` (removes x-cdp-request-id when `ENVIRONMENT≠local`)
+- **Test Execution**: `./entrypoint.sh` (uses `env.sh` for configuration and `PROFILE` to select scenarios)
+- **Key Documentation**: `README.md`, `.cursor/rules/*.mdc`
+- **Focus Areas**: Load testing (50 users), Stress testing (100 users), Spike testing (3-phase: 10→75→10 users)
+
+## Usage
+
+When working on this repository, LLMs should:
+1. Read the relevant rule files before making changes
+2. Follow the established patterns and conventions
+3. Maintain the performance testing focus
+4. Update documentation when making changes
+5. Test changes locally before suggesting them
+
+These rules ensure consistent, high-quality contributions to the performance testing suite.

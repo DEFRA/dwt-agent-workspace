@@ -733,3 +733,39 @@ Lewis Magri, 2026-11-26 15:21 UTC
 The hooks and `install-hooks` call `bin/rulesync/rulesync --command=generate --delete`.
 
 Covers: `bin/rulesync/rulesync`, `bin/rulesync/hooks/`, `bin/rulesync/install-hooks`, `.rulesync/rules/rulesync.md`, `.rulesync/rules/skill-scripts.md`, `.rulesync/skills/rulesync/SKILL.md`, `README.md`.
+
+## 85. Repository rules and skills apply only in that repository
+
+Lewis Magri, 2026-11-26 16:35 UTC
+
+Rules and skills copied from a repository live in `.rulesync/rules/<name>/` and `.rulesync/skills/<name>/`. A rule's globs are `repos/<name>/...`. A skill's `cursor.paths` and `claudecode.paths` are `repos/<name>/**`. They apply only while the work is in that repository.
+
+The copies are from `digital-waste-tracking-fe-uat`, `digital-waste-tracking-perf-test`, `digital-waste-tracking-uat`, and `digital-waste-tracking-docs`. Planning or writing API tests from a ticket uses create-uat-tests-from-jira in the uat folder.
+
+Covers: `.rulesync/rules/writing-rules.md`, `.rulesync/rules/atlassian-skills.md`, `.rulesync/skills/README.md`.
+
+## 86. Beta-2 rejections assert the errors array
+
+Lewis Magri, 2026-11-26 17:03 UTC
+
+Beta-2 validation rejections assert each `errors` item (`message`, `pointer`, `errorType`) in response order. `detail` is `1 validation error occurred` or `N validation errors occurred`, matching that array's length. The helpers take that array: `expectMovementRejected`, `expectCollectionRejected`, `expectDeliveryRejected`, and `expectReceiptRejected`. A receipt with a delivery ID takes the delivery ID, then the array. A receipt without one takes the array as the second argument.
+
+This replaces the decision to leave `detail` and `errors` unchecked until DWTC-221.
+
+Covers: `.rulesync/rules/digital-waste-tracking-uat/collections-beta.md`. The same sentence is in `repos/digital-waste-tracking-uat/.cursor/rules/collections-beta.mdc` on `DWTC-365_beta-2-error-assertions`.
+
+## 87. Test-pack env.sh is on the agent ignore list
+
+Lewis Magri, 2026-11-26 18:16 UTC
+
+`.rulesync/.aiignore` lists `env.sh` in `digital-waste-tracking-uat`, `digital-waste-tracking-fe-uat`, and `digital-waste-tracking-perf-test`. Generate writes that list to `.cursorignore` and to Claude Code `permissions.deny` in `.claude/settings.json`. `env.sh.template` stays readable. The generate features are `rules`, `skills`, and `ignore`. `.cursorignore` is gitignored.
+
+Covers: `.rulesync/.aiignore`, `rulesync.jsonc`, `bin/rulesync/rulesync`, `.gitignore`, `.rulesync/rules/rulesync.md`, `.rulesync/skills/rulesync/SKILL.md`.
+
+## 88. Any cloned repository env.sh is ignored
+
+Lewis Magri, 2026-11-26 18:19 UTC
+
+`.rulesync/.aiignore` lists `repos/*/env.sh` instead of the three named test packs. `env.sh` directly inside any cloned repository is ignored. `env.sh.template` stays readable.
+
+Covers: `.rulesync/.aiignore`, `.rulesync/rules/rulesync.md`, `.rulesync/skills/rulesync/SKILL.md`.

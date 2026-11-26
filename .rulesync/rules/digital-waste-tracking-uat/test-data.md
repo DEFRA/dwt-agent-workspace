@@ -1,0 +1,24 @@
+---
+root: false
+targets:
+  - '*'
+description: >-
+  digital-waste-tracking-uat. Test data management and isolation rules
+globs:
+  - 'repos/digital-waste-tracking-uat/**/*.test.js'
+  - 'repos/digital-waste-tracking-uat/**/test/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/specs/**/*.js'
+  - 'repos/digital-waste-tracking-uat/**/test-data-manager.js'
+cursor:
+  alwaysApply: false
+  description: >-
+    digital-waste-tracking-uat. Test data management and isolation rules
+---
+# Test Data Management & Isolation
+
+- **Centralized Test Data**: Use generators from the test data manager. Receipt tests use `generateBaseWasteReceiptData()` and `generateBaseBulkUploadMovement()`. Collections beta tests (`beta-1`, `beta-2`, `beta-3`, ...) use the matching `beta<n>` generators. See `collections-beta.mdc`
+- **Run-Scoped Identifiers**: Movement payloads take `apiCode` and `organisationId` from `globalThis.testConfig`. Those values are set once per run in global setup (`API_CODE`, `ORGANISATION_ID`), not generated inside each test
+- **Data Isolation**: Each test should generate fresh test data in `beforeEach` to ensure test independence
+- **No Hardcoded Test Data**: Avoid inline test data creation in test files
+- **Realistic Test Data**: Use realistic but clearly test-oriented data
+- **No Hardcoded Secrets**: Use placeholder values for environment variables in documentation and config files
